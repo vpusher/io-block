@@ -1,0 +1,77 @@
+<!doctype html>
+<html>
+
+<head>
+
+    <title>I/O Blocks</title>
+
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+
+    <script src="bower_components/platform/platform.js"></script>
+
+    <link rel="import" href="bower_components/font-roboto/roboto.html">
+    <link rel="import" href="bower_components/core-drag-drop/core-drag-drop.html">
+    <link rel="import" href="components/io-block.html">
+    <link rel="import" href="components/io-wire.html">
+
+    <style>
+
+    html,body {
+        height: 100%;
+        margin: 0;
+        background-color: #E5E5E5;
+        font-family: 'RobotoDraft', sans-serif;
+    }
+
+    </style>
+
+</head>
+
+<body unresolved>
+
+    <core-drag-drop></core-drag-drop>
+
+    <io-block id="b1">
+    </io-block>
+
+    <io-block id="b2" icount="2" ocount="2">
+    </io-block>
+
+    <io-wire id="w1">
+    </io-wire>
+
+    <script>
+
+        window.addEventListener('drag-start', function(e) {
+            var dragInfo = e.detail;
+            var target = dragInfo.event.target;
+
+            if (target.tagName.toLowerCase() === 'io-block') {
+                dragInfo.drag = drag;
+            }
+        });
+
+        function drag(dragInfo) {
+            var target = dragInfo.event.target;
+            if (target) {
+                var p = dragInfo.p;
+                target.setPosition(p.x, p.y);
+          }
+        }
+
+        window.addEventListener('polymer-ready', function(e) {
+            var w1 = document.querySelector('#w1');
+            var b1 = document.querySelector('#b1');
+            var b2 = document.querySelector('#b2');
+
+            w1.setOutput(b1, 'i0');
+            w1.setInput(b2, 'o1');
+        });
+
+
+    </script>
+</body>
+
+
+
+</html>

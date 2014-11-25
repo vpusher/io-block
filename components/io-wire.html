@@ -1,0 +1,180 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/core-splitter/core-splitter.html">
+
+<polymer-element name="io-wire" attributes="input inputBlock output outputBlock">
+    <template>
+        <style>
+            :host {
+                width: auto;
+                position: absolute;
+                top: 50px;
+                left: 50px;
+                z-index: 1;
+            }
+
+            .wire {
+                width: 100%;
+                height: 100%;
+                background-color: transparent;
+            }
+
+            .left {
+                border-top: 2px solid gray;
+                border-bottom: none;
+            }
+
+            .left.bottom {
+                border-top: none;
+                border-bottom: 2px solid gray;
+            }
+
+            .right {
+                border-top: none;
+                border-bottom: 2px solid gray;
+            }
+
+            .right.top {
+                border-bottom: none;
+                border-top: 2px solid gray;
+            }
+
+            core-splitter {
+                background: none;
+                box-shadow: none;
+                width: 0px;
+                border-left: 2px solid gray;
+            }
+
+            core-splitter:hover {
+                border-left: 2px solid gray;
+            }
+        </style>
+        <div horizontal layout class="wire">
+            <div class="left 
+                {{shouldReverse(positions.input.x, positions.input.y, positions.output.x, positions.output.y) ? 'bottom' : ''}}">
+                &nbsp;
+            </div>
+            <core-splitter direction="left"></core-splitter>
+            <div flex class="right 
+                {{shouldReverse(positions.input.x, positions.input.y, positions.output.x, positions.output.y) ? 'top' : ''}}">
+                &nbsp;
+            </div>
+        </div>
+    </template>
+
+
+    <script>
+    Polymer({
+
+        positions: {
+            input: {
+                x: 0,
+                y: 0
+            },
+            output: {
+                x:0,
+                y:0
+            }
+        },
+
+        observe: {
+            'inputBlock.position.x': 'inputPositionChanged',
+            'inputBlock.position.y': 'inputPositionChanged',
+            'outputBlock.position.x': 'outputPositionChanged',
+            'outputBlock.position.y': 'outputPositionChanged'
+        },
+
+        /**
+         *   _
+         * _|
+         */
+        shouldReverse: function (ix, iy, ox, oy) {
+            return (iy > oy) ? !(ix > ox) : (ix > ox);
+        },
+
+        inputPositionChanged: function () {
+            var rect = this.inputBlock.$.container.querySelector('#' + this.inputPlug).getBoundingClientRect();
+            this.setInputPosition(rect.left + rect.width, rect.top + rect.height/2);
+        },
+
+        outputPositionChanged: function () {
+            var rect = this.outputBlock.$.container.querySelector('#' + this.outputPlug).getBoundingClientRect();
+            this.setOutputPosition(rect.left, rect.top + rect.height/2);
+        },
+
+        setInputPosition: function (x, y) {
+            var ox = this.positions.output.x,
+                oy = this.positions.output.y,
+                viewport = document.body.getBoundingClientRect(),
+                style = this.style;
+
+            if (typeof x === 'number') {
+                this.positions.input.x = x;
+                if (x > ox) {
+                    style.right = viewport.width - x +'px';
+                } else {
+                    style.left = x +'px';
+                }
+            }
+
+            if (typeof y === 'number') {
+                this.positions.input.y = y;
+                if (y > oy) {
+                    style.bottom = viewport.height - y + 'px';
+
+                } else {
+                    style.top = y + 'px';
+                }
+            }
+
+        },
+
+        setOutputPosition: function (x, y) {
+            var ix = this.positions.input.x,
+                iy = this.positions.input.y,
+                viewport = document.body.getBoundingClientRect(),
+                style = this.style;
+
+            if (typeof x === 'number') {
+                this.positions.output.x = x;
+                if (x > ix) {
+                    style.right = viewport.width - x +'px';
+                } else {
+                    style.left = x +'px';
+                }
+            }
+
+            if (typeof y === 'number') {
+                this.positions.output.y = y;
+                if (y > iy) {
+                    style.bottom = viewport.height - y + 'px';
+
+                } else {
+                    style.top = y + 'px';
+                }
+            }
+
+        },
+
+        setInput: function (block, ioref) {
+            var matches = ioref.match(/([iI|oO])(\d+)/);
+            if (matches.length === 3) {
+                this.inputPlug = ioref;
+                this.inputBlock = block;
+                block.outputs[matches[2]] = this;
+            }
+        },
+
+        setOutput: function (block, ioref) {
+            var matches = ioref.match(/([iI|oO])(\d+)/);
+            if (matches.length === 3) {
+                this.outputPlug = ioref;
+                this.outputBlock = block;
+                block.inputs[matches[2]] = this;
+            }
+        }
+
+    });
+    </script>
+
+</polymer-element>
