@@ -1,7 +1,7 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="../bower_components/core-splitter/core-splitter.html">
 
-<polymer-element name="io-wire" attributes="input inputBlock output outputBlock">
+<polymer-element name="io-wire" attributes="input output positions">
     <template>
         <style>
             :host {
@@ -10,6 +10,8 @@
                 top: 50px;
                 left: 50px;
                 z-index: 1;
+/*                min-width: 2px;
+                min-height: 2px;*/
             }
 
             .wire {
@@ -54,7 +56,7 @@
                 {{shouldReverse(positions.input.x, positions.input.y, positions.output.x, positions.output.y) ? 'bottom' : ''}}">
                 &nbsp;
             </div>
-            <core-splitter direction="left"></core-splitter>
+            <core-splitter direction="left" ></core-splitter>
             <div flex class="right 
                 {{shouldReverse(positions.input.x, positions.input.y, positions.output.x, positions.output.y) ? 'top' : ''}}">
                 &nbsp;
@@ -77,11 +79,44 @@
             }
         },
 
+        input: {
+            block: undefined,
+            blockPlug: undefined
+        },
+
+        output: {
+            block: undefined,
+            blockPlug: undefined
+        },
+
         observe: {
-            'inputBlock.position.x': 'inputPositionChanged',
-            'inputBlock.position.y': 'inputPositionChanged',
-            'outputBlock.position.x': 'outputPositionChanged',
-            'outputBlock.position.y': 'outputPositionChanged'
+            'input.block.position.x': 'inputPositionChanged',
+            'input.block.position.y': 'inputPositionChanged',
+            'output.block.position.x': 'outputPositionChanged',
+            'output.block.position.y': 'outputPositionChanged'
+        },
+
+        created: function () {
+            this.positions = {
+                input: {
+                    x: 0,
+                    y: 0
+                },
+                output: {
+                    x:0,
+                    y:0
+                }
+            };
+
+            this.input = {
+                block: undefined,
+                blockPlug: undefined
+            };
+
+            this.output = {
+                block: undefined,
+                blockPlug: undefined
+            };
         },
 
         /**
@@ -92,14 +127,26 @@
             return (iy > oy) ? !(ix > ox) : (ix > ox);
         },
 
-        inputPositionChanged: function () {
-            var rect = this.inputBlock.$.container.querySelector('#' + this.inputPlug).getBoundingClientRect();
-            this.setInputPosition(rect.left + rect.width, rect.top + rect.height/2);
+        inputPositionChanged: function (x, y) {
+            if (this.isInputPlugged()) {
+                var rect = this.input.block.$.container.querySelector('#' + this.input.blockPlug).getBoundingClientRect();
+                this.setInputPosition(rect.left + rect.width, rect.top + rect.height/2);
+            }
         },
 
-        outputPositionChanged: function () {
-            var rect = this.outputBlock.$.container.querySelector('#' + this.outputPlug).getBoundingClientRect();
-            this.setOutputPosition(rect.left, rect.top + rect.height/2);
+        outputPositionChanged: function (x, y) {
+            if (this.isOutputPlugged()) {
+                var rect = this.output.block.$.container.querySelector('#' + this.output.blockPlug).getBoundingClientRect();
+                this.setOutputPosition(rect.left, rect.top + rect.height/2);
+            }
+        },
+
+        isInputPlugged: function () {
+            return !!(this.input.block && this.input.blockPlug);
+        },
+
+        isOutputPlugged: function () {
+            return !!(this.output.block && this.output.blockPlug);
         },
 
         setInputPosition: function (x, y) {
@@ -121,7 +168,6 @@
                 this.positions.input.y = y;
                 if (y > oy) {
                     style.bottom = viewport.height - y + 'px';
-
                 } else {
                     style.top = y + 'px';
                 }
@@ -156,22 +202,42 @@
 
         },
 
-        setInput: function (block, ioref) {
-            var matches = ioref.match(/([iI|oO])(\d+)/);
-            if (matches.length === 3) {
-                this.inputPlug = ioref;
-                this.inputBlock = block;
-                block.outputs[matches[2]] = this;
+        setInput: function (block, ioref, shouldPlugBlock) {
+            if (block && ioref) {
+                this.input.block = block;
+                this.input.blockPlug = ioref;
+                if (shouldPlugBlock) {
+                    IO.isInput(ioref) && block.setInput(this, ioref, false);
+                    IO.isOutput(ioref) && block.setOutput(this, ioref, false);
+                }
             }
         },
 
-        setOutput: function (block, ioref) {
-            var matches = ioref.match(/([iI|oO])(\d+)/);
-            if (matches.length === 3) {
-                this.outputPlug = ioref;
-                this.outputBlock = block;
-                block.inputs[matches[2]] = this;
+        unsetInput: function (shouldUnplugBlock) {
+            if(shouldUnplugBlock && this.isInputPlugged()) {
+                this.input.block.unsetOutput(this.input.blockPlug, false);
             }
+            this.input.block = undefined;
+            this.input.blockPlug = undefined;
+        },
+
+        setOutput: function (block, ioref, shouldPlugBlock) {
+            if (block && ioref) {
+                this.output.blockPlug = ioref;
+                this.output.block = block;
+                if (shouldPlugBlock) {
+                    IO.isInput(ioref) && block.setInput(this, ioref, false);
+                    IO.isOutput(ioref) && block.setOutput(this, ioref, false);
+                }
+            }
+        },
+
+        unsetOutput: function (shouldUnplugBlock) {
+            if(shouldUnplugBlock && this.isOutputPlugged()) {
+                this.output.block.unsetInput(this.output.blockPlug, false);
+            }
+            this.output.block = undefined;
+            this.output.blockPlug = undefined;
         }
 
     });

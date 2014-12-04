@@ -47,7 +47,7 @@
                 <div vertical layout class="inputs">
                     <template repeat="{{input, index in inputs}}">
                          <div id="i{{index}}" horizontal layout class="input">
-                            <paper-checkbox checked?="{{inputs[index]}}"></paper-checkbox>
+                            <paper-checkbox on-change="{{onToggleInput}}" checked?="{{inputs[index].wire}}"></paper-checkbox>
                             <label>In {{index}}</label>
                         </div>
                     </template>
@@ -57,7 +57,7 @@
                 <div vertical layout class="outputs">
                     <template repeat="{{output, index in outputs}}">
                          <div id="o{{index}}" horizontal layout reverse class="output">
-                            <paper-checkbox checked?="{{outputs[index]}}"></paper-checkbox>
+                            <paper-checkbox on-change="{{onToggleOutput}}" checked?="{{outputs[index].wire}}"></paper-checkbox>
                             <label>Out {{index}}</label>
                         </div>
                     </template>
@@ -81,20 +81,24 @@
             y: 0
         },
 
+        created: function () {
+            this.position = {x: 0, y: 0};
+        },
+
         ready: function () {
             var i = 0,
                 inputs = [],
                 outputs = [];
 
             while (i < this.icount) {
-                inputs.push(undefined);
+                inputs.push({});
                 i++;
             }
 
             i = 0;
 
             while (i < this.ocount) {
-                outputs.push(undefined);
+                outputs.push({});
                 i++;
             }
 
@@ -114,6 +118,86 @@
                 style.top = y + 'px';
                 this.position.y = y;
             //}
+        },
+
+        onToggleInput: function (event, detail, sender) {
+            var index, wire;
+
+            // Remove wire
+            if (!sender.checked) {
+                index = IO.getIndex(sender.parentElement.id);
+                wire = this.inputs[index].wire;
+                this.unsetInput(index, true);
+                wire.unsetInput(true);
+                wire.remove();
+                Manager.endAddWire() // Just in case.
+            // Add wire
+            } else {
+                wire = Manager.currentWire;
+                if (!Manager.currentWire) {
+                    wire = Manager.beginAddWire();
+                } else {
+                    Manager.endAddWire();
+                }
+                wire.setOutput(this, sender.parentElement.id, true);
+            }
+        },
+
+        onToggleOutput: function (event, detail, sender) {
+            var index, wire;
+
+            // Remove wire
+            if (!sender.checked) {
+                index = IO.getIndex(sender.parentElement.id);
+                wire = this.outputs[index].wire;
+                this.unsetOutput(index, true);
+                wire.unsetOutput(true);
+                wire.remove();
+                Manager.endAddWire() // Just in case.
+            // Add wire
+            } else {
+                wire = Manager.currentWire;
+                if (!Manager.currentWire) {
+                    wire = Manager.beginAddWire();
+                } else {
+                    Manager.endAddWire();
+                }
+                wire.setInput(this, sender.parentElement.id, true);
+            }
+        },
+
+        setInput: function (wire, inputRef, shouldPlugWire) {
+            var index = IO.getIndex(inputRef);
+            this.inputs[index].wire = wire;
+            if (shouldPlugWire) {
+                wire.setOutput(this, 'i' + index, false);
+            }
+        },
+
+        unsetInput: function (inputRef, shouldUnplugWire) {
+            var input = this.inputs[IO.getIndex(inputRef)];
+            if (shouldUnplugWire) {
+                input.wire.unsetOutput(false);
+            }
+            input.wire = undefined;
+            input.value = undefined;
+        },
+
+        setOutput: function (wire, outputRef, shouldPlugWire) {
+            var index = IO.getIndex(outputRef);
+            this.outputs[index].wire = wire;
+            if (shouldPlugWire) {
+                wire.setInput(this, 'o' + index, false);
+            }
+        },
+
+        unsetOutput: function (outputRef, shouldUnplugWire) {
+            var output = this.outputs[IO.getIndex(outputRef)];
+            if (shouldUnplugWire) {
+                output.wire.unsetInput(false);
+            }
+            output.wire = undefined;
+            output.value = undefined;
         },
 
         compute: function () {

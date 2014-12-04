@@ -10,7 +10,9 @@
     <script src="bower_components/platform/platform.js"></script>
 
     <link rel="import" href="bower_components/font-roboto/roboto.html">
+    <link rel="import" href="bower_components/core-icons/core-icons.html">
     <link rel="import" href="bower_components/core-drag-drop/core-drag-drop.html">
+    <link rel="import" href="bower_components/paper-fab/paper-fab.html">
     <link rel="import" href="components/io-block.html">
     <link rel="import" href="components/io-wire.html">
 
@@ -23,6 +25,12 @@
         font-family: 'RobotoDraft', sans-serif;
     }
 
+    #add-action {
+        position: absolute;
+        bottom: 25px;
+        right: 25px;
+    }
+
     </style>
 
 </head>
@@ -31,16 +39,111 @@
 
     <core-drag-drop></core-drag-drop>
 
-    <io-block id="b1">
+    <io-block id="b1" style="left:400px; top:250px;">
     </io-block>
 
-    <io-block id="b2" icount="2" ocount="2">
+    <io-block id="b2" icount="2" ocount="2" style="left:100px; top:260px;">
+    </io-block>
+
+    <io-block id="b3" style="left:500px; top:320px;">
     </io-block>
 
     <io-wire id="w1">
     </io-wire>
 
+    <io-wire id="w2">
+    </io-wire>
+
+    <paper-fab id="add-action" icon="add" onclick="Manager.addBlock()" ></paper-fab>
+
     <script>
+
+        var i = 10, j = 10;
+
+        var IO = {
+            pattern: /([iI|oO])(\d+)/,
+
+            getIndex: function (ref) {
+                var matches, parsed;
+                if (typeof ref === "number") {
+                    return ref;
+                } else if (!isNaN(parsed = parseInt(ref))) {
+                    return parsed;
+                } else if ((matches = ref.match(IO.pattern)) && matches.length === 3) {
+                    return matches[2];
+                } else {
+                    return undefined;
+                }
+            },
+
+            getType: function (ref) {
+                var matches;
+                if ((matches = ref.match(IO.pattern)) && matches.length === 3) {
+                    return matches[1];
+                } else {
+                    return undefined;
+                }
+            },
+
+            isInput: function (ref) {
+                return IO.getType(ref).match(/[iI]/g);
+            },
+
+            isOutput: function (ref) {
+                return IO.getType(ref).match(/[oO]/g);
+            }
+        }
+
+        var Manager = {
+            currentWire: undefined,
+            addBlock: function() {
+                var block = document.createElement('io-block');
+                block.setAttribute('id', 'b' + i);
+                block.setAttribute('icount', 1);
+                block.setAttribute('ocount', 1);
+                document.body.appendChild(block);
+                i++;
+                return block;
+            },
+
+            beginAddWire: function() {
+                var wire = document.createElement('io-wire');
+                wire.setAttribute('id', 'w' + j);
+                document.body.appendChild(wire);
+                Manager.currentWire = wire;
+                j++;
+                return wire;
+            },
+
+            endAddWire: function() {
+                Manager.currentWire = undefined;
+            },
+
+            removeBlock: function(id) {
+                var block = document.querySelector('#' + id);
+                block.remove();
+            },
+
+            removeWire: function(id) {
+                var wire = document.querySelector('#' + id);
+                wire.remove();
+            }
+        }
+
+        function drag(dragInfo) {
+            var target = dragInfo.event.target;
+            if (target) {
+                var p = dragInfo.p;
+                target.setPosition(p.x, p.y);
+          }
+        }
+
+        function refresh() {
+            document.querySelectorAll('io-wire').array().forEach(function (el) {
+                el.inputPositionChanged();
+                el.outputPositionChanged();
+            });
+        }
 
         window.addEventListener('drag-start', function(e) {
             var dragInfo = e.detail;
@@ -51,21 +154,28 @@
             }
         });
 
-        function drag(dragInfo) {
-            var target = dragInfo.event.target;
-            if (target) {
-                var p = dragInfo.p;
-                target.setPosition(p.x, p.y);
-          }
-        }
+        window.addEventListener('resize', refresh);
 
         window.addEventListener('polymer-ready', function(e) {
             var w1 = document.querySelector('#w1');
+            var w2 = document.querySelector('#w2');
             var b1 = document.querySelector('#b1');
             var b2 = document.querySelector('#b2');
+            var b3 = document.querySelector('#b3');
 
-            w1.setOutput(b1, 'i0');
-            w1.setInput(b2, 'o1');
+            w1.setOutput(b1, 'i0', true);
+            w1.setInput(b2, 'o0', true);
+
+            //w2.setOutput(b3, 'i0', true);
+            //w2.setInput(b2, 'o1', true);
+
+            // OR ...
+            //b1.setInput(w1, '0', true);
+            //b2.setOutput(w1, '0', true);
+
+            // FIXME: remove this and handle the init properly.
+            // The position (x, y) of wire input and output need to be set together in order the style attributes obtain the right value.
+            refresh();
         });
 
 
