@@ -99,24 +99,64 @@
         },
 
         /**
-         *   _
-         * _|
+         *   _      _
+         * _|   or   |_
+         *
          */
         shouldReverse: function (ix, iy, ox, oy) {
             return (iy > oy) ? !(ix > ox) : (ix > ox);
         },
 
-        inputPositionChanged: function (x, y) {
-            if (this.isInputPlugged()) {
-                var rect = this.input.block.$.container.querySelector('#' + this.input.blockPlug).getBoundingClientRect();
-                this.setInputPosition(rect.left + rect.width, rect.top + rect.height/2);
-            }
+        // inputPositionChanged: function (x, y) {
+        //     if (this.isInputPlugged()) {
+        //         var rect = this.input.block.$.container.querySelector('#' + this.input.blockPlug).getBoundingClientRect();
+        //         this.setInputPosition(rect.left + rect.width, rect.top + rect.height/2);
+        //     }
+        // },
+
+        // outputPositionChanged: function (x, y) {
+        //     if (this.isOutputPlugged()) {
+        //         var rect = this.output.block.$.container.querySelector('#' + this.output.blockPlug).getBoundingClientRect();
+        //         this.setOutputPosition(rect.left, rect.top + rect.height/2);
+        //     }
+        // },
+
+        inputPositionChanged: function () {
+            this.positionChanged(true);
         },
 
-        outputPositionChanged: function (x, y) {
-            if (this.isOutputPlugged()) {
-                var rect = this.output.block.$.container.querySelector('#' + this.output.blockPlug).getBoundingClientRect();
-                this.setOutputPosition(rect.left, rect.top + rect.height/2);
+        outputPositionChanged: function () {
+            this.positionChanged(false);
+        },
+
+        positionChanged: function (isInput) {
+
+            var rectI, rectO;
+
+            function getRect(io) {
+                return io.block.$.container.querySelector('#' + io.blockPlug).getBoundingClientRect();
+            }
+
+            // Only input plugged
+            if (this.isInputPlugged() && !this.isOutputPlugged()) {
+                rectI = getRect(this.input);
+                this.setInputPosition(rectI.left + rectI.width, rectI.top + rectI.height/2);
+            // Only output plugged
+            } else if (!this.isInputPlugged() && this.isOutputPlugged()) {
+                rectO = getRect(this.output);
+                this.setOutputPosition(rectO.left, rectO.top + rectO.height/2);
+            // Both plugged
+            } else if (this.isInputPlugged() && this.isOutputPlugged()) {
+                rectI = getRect(this.input);
+                rectO = getRect(this.output);
+
+                if (isInput) {
+                    this.setInputPosition(rectI.left + rectI.width, rectI.top + rectI.height/2);
+                    this.setOutputPosition(rectO.left, rectO.top + rectO.height/2);
+                } else {
+                    this.setOutputPosition(rectO.left, rectO.top + rectO.height/2);
+                    this.setInputPosition(rectI.left + rectI.width, rectI.top + rectI.height/2);
+                }
             }
         },
 
@@ -182,7 +222,7 @@
         },
 
         setInput: function (block, ioref, shouldPlugBlock) {
-            if (block && ioref) {
+            if (block && IO.isOutput(ioref)) {
                 this.input.block = block;
                 this.input.blockPlug = ioref;
                 if (shouldPlugBlock) {
@@ -201,7 +241,7 @@
         },
 
         setOutput: function (block, ioref, shouldPlugBlock) {
-            if (block && ioref) {
+            if (block && IO.isInput(ioref)) {
                 this.output.blockPlug = ioref;
                 this.output.block = block;
                 if (shouldPlugBlock) {

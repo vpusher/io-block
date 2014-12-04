@@ -74,7 +74,7 @@
 
         icount: 1,
 
-        ocount: 0,
+        ocount: 1,
 
         created: function () {
             this.position = {x: 0, y: 0};
@@ -116,48 +116,59 @@
         },
 
         onToggleInput: function (event, detail, sender) {
-            var index, wire;
+            var index = IO.getIndex(sender.parentElement.id),
+                wire;
 
-            // Remove wire
-            if (!sender.checked) {
-                index = IO.getIndex(sender.parentElement.id);
-                wire = this.inputs[index].wire;
+            // Remove wire if already plugged/checked
+            if (!sender.checked && (wire = this.inputs[index].wire)) {
                 this.unsetInput(index, true);
                 wire.unsetInput(true);
                 wire.remove();
                 Manager.endAddWire() // Just in case.
-            // Add wire
+            // Handle new wire if not plugged/checked.
             } else {
                 wire = Manager.currentWire;
-                if (!Manager.currentWire) {
+                // 1) First plug: start add wire.
+                if (!wire) {
                     wire = Manager.beginAddWire();
-                } else {
+                    wire.setOutput(this, sender.parentElement.id, true);
+                // 2) Second plug: stop add wire. Only plug wire output if not already plug (avoid wire between 2 outputs).
+                } else if (!wire.isOutputPlugged()) {
                     Manager.endAddWire();
+                    wire.setOutput(this, sender.parentElement.id, true);
+                } else {
+                    event.preventDefault();
+                    event.stopImmediatePropagation();
+                    event.stopPropagation();
                 }
-                wire.setOutput(this, sender.parentElement.id, true);
             }
         },
 
         onToggleOutput: function (event, detail, sender) {
-            var index, wire;
-
-            // Remove wire
-            if (!sender.checked) {
-                index = IO.getIndex(sender.parentElement.id);
-                wire = this.outputs[index].wire;
+            var index = IO.getIndex(sender.parentElement.id),
+                wire;
+            // Remove wire if already plugged/checked
+            if (!sender.checked && (wire = this.outputs[index].wire)) {
                 this.unsetOutput(index, true);
                 wire.unsetOutput(true);
                 wire.remove();
                 Manager.endAddWire() // Just in case.
-            // Add wire
+            // Handle new wire if not plugged/checked.
             } else {
                 wire = Manager.currentWire;
-                if (!Manager.currentWire) {
+                // 1) First plug: start add wire.
+                if (!wire) {
                     wire = Manager.beginAddWire();
-                } else {
+                    wire.setInput(this, sender.parentElement.id, true);
+                // 2) Second plug: stop add wire. Only plug wire input if not already plugged (avoid wire between 2 inputs).
+                } else if (!wire.isInputPlugged()) {
                     Manager.endAddWire();
+                    wire.setInput(this, sender.parentElement.id, true);
+                } else {
+                    event.preventDefault();
+                    event.stopImmediatePropagation();
+                    event.stopPropagation();
                 }
-                wire.setInput(this, sender.parentElement.id, true);
             }
         },
 
@@ -172,7 +183,7 @@
         unsetInput: function (inputRef, shouldUnplugWire) {
             var input = this.inputs[IO.getIndex(inputRef)];
             if (shouldUnplugWire) {
-                input.wire.unsetOutput(false);
+                input.wire && input.wire.unsetOutput(false);
             }
             input.wire = undefined;
             input.value = undefined;
@@ -189,7 +200,7 @@
         unsetOutput: function (outputRef, shouldUnplugWire) {
             var output = this.outputs[IO.getIndex(outputRef)];
             if (shouldUnplugWire) {
-                output.wire.unsetInput(false);
+                output.wire && output.wire.unsetInput(false);
             }
             output.wire = undefined;
             output.value = undefined;

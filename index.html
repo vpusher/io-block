@@ -42,7 +42,7 @@
     <io-block id="b1" style="left:400px; top:250px;">
     </io-block>
 
-    <io-block id="b2" icount="2" ocount="2" style="left:100px; top:260px;">
+    <io-block id="b2" icount="2" ocount="2" style="left:100px; top:290px;">
     </io-block>
 
 <!--     <io-block id="b3" style="left:500px; top:320px;">
@@ -140,8 +140,7 @@
 
         function refresh() {
             document.querySelectorAll('io-wire').array().forEach(function (el) {
-                el.inputPositionChanged();
-                el.outputPositionChanged();
+                el.positionChanged();
             });
         }
 
@@ -163,8 +162,8 @@
             var b2 = document.querySelector('#b2');
             var b3 = document.querySelector('#b3');
 
-            w1.setOutput(b1, 'i0', true);
             w1.setInput(b2, 'o0', true);
+            w1.setOutput(b1, 'i0', true);
 
             //w2.setOutput(b3, 'i0', true);
             //w2.setInput(b2, 'o1', true);
@@ -172,10 +171,6 @@
             // OR ...
             //b1.setInput(w1, '0', true);
             //b2.setOutput(w1, '0', true);
-
-            // FIXME: remove this and handle the init properly.
-            // The position (x, y) of wire input and output need to be set together in order the style attributes obtain the right value.
-            refresh();
         });
 
 
