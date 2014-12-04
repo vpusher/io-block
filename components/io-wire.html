@@ -10,8 +10,8 @@
                 top: 50px;
                 left: 50px;
                 z-index: 1;
-/*                min-width: 2px;
-                min-height: 2px;*/
+                min-width: 2px;
+                min-height: 2px;
             }
 
             .wire {
@@ -67,27 +67,6 @@
 
     <script>
     Polymer({
-
-        positions: {
-            input: {
-                x: 0,
-                y: 0
-            },
-            output: {
-                x:0,
-                y:0
-            }
-        },
-
-        input: {
-            block: undefined,
-            blockPlug: undefined
-        },
-
-        output: {
-            block: undefined,
-            blockPlug: undefined
-        },
 
         observe: {
             'input.block.position.x': 'inputPositionChanged',
