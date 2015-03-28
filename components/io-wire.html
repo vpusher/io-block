@@ -9,7 +9,7 @@
                 position: absolute;
                 top: 50px;
                 left: 50px;
-                z-index: 1;
+                /*z-index: 1;*/
                 min-width: 2px;
                 min-height: 2px;
             }
@@ -72,7 +72,9 @@
             'input.block.position.x': 'inputPositionChanged',
             'input.block.position.y': 'inputPositionChanged',
             'output.block.position.x': 'outputPositionChanged',
-            'output.block.position.y': 'outputPositionChanged'
+            'output.block.position.y': 'outputPositionChanged',
+            'input.blockOutput.value': 'compute'
+            //'output.blockInput.value': 'compute' // can't be triggered since already listen by blocks.
         },
 
         created: function () {
@@ -89,12 +91,14 @@
 
             this.input = {
                 block: undefined,
-                blockPlug: undefined
+                blockPlug: undefined,
+                blockOutput: undefined
             };
 
             this.output = {
                 block: undefined,
-                blockPlug: undefined
+                blockPlug: undefined,
+                blockInput: undefined
             };
         },
 
@@ -133,8 +137,17 @@
 
             var rectI, rectO;
 
+            // FIXME: need to compute the position relative to the canvas (i.e minus tool-bar height = -65).
             function getRect(io) {
-                return io.block.$.container.querySelector('#' + io.blockPlug).getBoundingClientRect();
+                var rect = io.block.$.container.querySelector('#' + io.blockPlug).getBoundingClientRect();
+                return {
+                    top: rect.top - 65,
+                    right: rect.right,
+                    bottom: rect.bottom,
+                    left: rect.left,
+                    width: rect.width,
+                    height: rect.height
+                };
             }
 
             // Only input plugged
@@ -150,6 +163,7 @@
                 rectI = getRect(this.input);
                 rectO = getRect(this.output);
 
+                // FIXME: find a way to avoid this test (the instruction order should not matter).
                 if (isInput) {
                     this.setInputPosition(rectI.left + rectI.width, rectI.top + rectI.height/2);
                     this.setOutputPosition(rectO.left, rectO.top + rectO.height/2);
@@ -171,7 +185,7 @@
         setInputPosition: function (x, y) {
             var ox = this.positions.output.x,
                 oy = this.positions.output.y,
-                viewport = document.body.getBoundingClientRect(),
+                viewport = this.parentElement.getBoundingClientRect(),
                 style = this.style;
 
             if (typeof x === 'number') {
@@ -197,7 +211,7 @@
         setOutputPosition: function (x, y) {
             var ix = this.positions.input.x,
                 iy = this.positions.input.y,
-                viewport = document.body.getBoundingClientRect(),
+                viewport = this.parentElement.getBoundingClientRect(),
                 style = this.style;
 
             if (typeof x === 'number') {
@@ -222,41 +236,58 @@
         },
 
         setInput: function (block, ioref, shouldPlugBlock) {
+            var wInput = this.input;
             if (block && IO.isOutput(ioref)) {
-                this.input.block = block;
-                this.input.blockPlug = ioref;
+                wInput.block = block;
+                wInput.blockPlug = ioref;
+                wInput.blockOutput = block.outputs[IO.getIndex(ioref)];
                 if (shouldPlugBlock) {
                     IO.isInput(ioref) && block.setInput(this, ioref, false);
                     IO.isOutput(ioref) && block.setOutput(this, ioref, false);
                 }
+                this.compute();
             }
         },
 
         unsetInput: function (shouldUnplugBlock) {
+            var wInput = this.input;
             if(shouldUnplugBlock && this.isInputPlugged()) {
-                this.input.block.unsetOutput(this.input.blockPlug, false);
+                wInput.block.unsetOutput(this.input.blockPlug, false);
             }
-            this.input.block = undefined;
-            this.input.blockPlug = undefined;
+
+            wInput.block = undefined;
+            wInput.blockPlug = undefined;
+            wInput.blockOutput = undefined;
         },
 
         setOutput: function (block, ioref, shouldPlugBlock) {
+            var wOutput = this.output;
             if (block && IO.isInput(ioref)) {
-                this.output.blockPlug = ioref;
-                this.output.block = block;
+                wOutput.blockPlug = ioref;
+                wOutput.block = block;
+                wOutput.blockInput = block.inputs[IO.getIndex(ioref)];
                 if (shouldPlugBlock) {
                     IO.isInput(ioref) && block.setInput(this, ioref, false);
                     IO.isOutput(ioref) && block.setOutput(this, ioref, false);
                 }
+                this.compute();
             }
         },
 
         unsetOutput: function (shouldUnplugBlock) {
+            var wOutput = this.output;
             if(shouldUnplugBlock && this.isOutputPlugged()) {
-                this.output.block.unsetInput(this.output.blockPlug, false);
+                wOutput.block.unsetInput(this.output.blockPlug, false);
             }
-            this.output.block = undefined;
-            this.output.blockPlug = undefined;
+            wOutput.block = undefined;
+            wOutput.blockPlug = undefined;
+            wOutput.blockInput = undefined;
+        },
+
+        compute: function () {
+            if (this.isInputPlugged() && this.isOutputPlugged()) {
+                this.output.blockInput.value = this.input.blockOutput.value;
+            }
         }
 
     });
