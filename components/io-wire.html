@@ -82,17 +82,17 @@
             this.input = {
                 x: 0,
                 y: 0,
-                block: undefined,
-                blockPlug: undefined,
-                blockOutput: undefined
+                block: undefined,      // Remote block element.
+                blockPlug: undefined,  // Remote block output reference ("o3", "o5", ...).
+                blockOutput: undefined // Remote block output object.
             };
 
             this.output = {
                 x: 0,
                 y: 0,
-                block: undefined,
-                blockPlug: undefined,
-                blockInput: undefined
+                block: undefined,     // Remote block element.
+                blockPlug: undefined, // Remote block input reference ("i1", "i4", ...).
+                blockInput: undefined // Remote block input object.
             };
         },
 
