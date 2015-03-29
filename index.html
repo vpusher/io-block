@@ -76,102 +76,56 @@
             <div id="canvas">
                 <core-drag-drop></core-drag-drop>
 
-                <io-wire id="w1">
-                </io-wire>
+                <io-wire id="w1"></io-wire>
+                <io-wire id="w2"></io-wire>
+                <io-wire id="w3"></io-wire>
+                <io-wire id="w4"></io-wire>
+
                 <io-block
+                    x="100"
+                    y="100"
                     id="s1"
-                    icount = "0"
-                    style="left:100px; top:50px;">
+                    icount = "0">
                 </io-block>
 
-               <!--  <io-block
+                <io-block
                     id="s2"
-                    icount = "0"
-                    style="left:100px; top:290px;">
+                    x="100"
+                    y="290"
+                    icount = "0">
                 </io-block>
 
                 <io-block
                     id="s3"
-                    icount = "0"
-                    style="left:100px; top:500px;">
-                </io-block> -->
-
-                <io-block
-                    id="c1"
-                    style="left:400px; top:150px;">
+                    x="100"
+                    y="500"
+                    icount = "0">
                 </io-block>
 
-<!--                 <io-block
+                <io-block
+                    x="400"
+                    y="150"
+                    icount = "2"
+                    id="c1">
+                </io-block>
+
+                <io-block
                     id="c2"
-                    style="left:400px; top:400px;">
+                    x="400"
+                    y="400"
+                    icount = "2">
                 </io-block>
 
                 <io-block
                     id="c3"
-                    style="left:650px; top:300px;">
-                </io-block> -->
+                    x="650"
+                    y="300"
+                    icount = "2">
+                </io-block>
 
-<!--                 <io-wire id="w2">
-                </io-wire>
-
-                <io-wire id="w3">
-                </io-wire>
-
-                <io-wire id="w4"> -->
-                </io-wire>
             </div>
         </core-header-panel>
     </core-drawer-panel>
-
-    <!-- <div id="blocks">
-    <core-drag-drop></core-drag-drop>
-    <io-block
-        id="s1"
-        icount = "0"
-        style="left:100px; top:50px;">
-    </io-block>
-
-    <io-block
-        id="s2"
-        icount = "0"
-        style="left:100px; top:290px;">
-    </io-block>
-
-    <io-block
-        id="s3"
-        icount = "0"
-        style="left:100px; top:500px;">
-    </io-block>
-
-    <io-block
-        id="c1"
-        style="left:400px; top:150px;">
-    </io-block>
-
-    <io-block
-        id="c2"
-        style="left:400px; top:400px;">
-    </io-block>
-
-    <io-block
-        id="c3"
-        style="left:650px; top:300px;">
-    </io-block>
-
-
-    <io-wire id="w1">
-    </io-wire>
-
-    <io-wire id="w2">
-    </io-wire>
-
-    <io-wire id="w3">
-    </io-wire>
-
-    <io-wire id="w4">
-    </io-wire>
-
-    </div> -->
 
     <paper-fab id="add-action" icon="add" onclick="Manager.addBlock();" ></paper-fab>
 
@@ -246,6 +200,7 @@
                 var canvas = document.querySelector('#canvas');
 
                 block.setAttribute('id', 'b' + i);
+                block.setAttribute('name', 'b' + i);
                 block.setAttribute('icount', 1);
                 block.setAttribute('ocount', 1);
 
@@ -292,7 +247,8 @@
             var target = dragInfo.event.target;
             if (target) {
                 var p = dragInfo.p, d = dragInfo.delta;
-                target.setPosition(p.x - d.x, p.y - d.y);
+                target.x = p.x - d.x;
+                target.y = p.y - d.y;
           }
         }
 
@@ -309,8 +265,8 @@
             if (target.tagName.toLowerCase() === 'io-block') {
                 dragInfo.drag = drag;
                 dragInfo.delta = {
-                    x: dragInfo.event.clientX - parseInt(target.style.left.split('px')[0]),
-                    y: dragInfo.event.clientY - parseInt(target.style.top.split('px')[0])
+                    x: dragInfo.event.clientX - parseInt(target.x),
+                    y: dragInfo.event.clientY - parseInt(target.y)
                 };
             }
         });
@@ -319,34 +275,34 @@
 
         window.addEventListener('polymer-ready', function(e) {
             var w1 = document.querySelector('#w1');
-            //var w2 = document.querySelector('#w2');
-            //var w3 = document.querySelector('#w3');
-            //var w4 = document.querySelector('#w4');
+            var w2 = document.querySelector('#w2');
+            var w3 = document.querySelector('#w3');
+            var w4 = document.querySelector('#w4');
             var s1 = document.querySelector('#s1');
-            //var s2 = document.querySelector('#s2');
-            //var s3 = document.querySelector('#s3');
+            var s2 = document.querySelector('#s2');
+            var s3 = document.querySelector('#s3');
             var c1 = document.querySelector('#c1');
-            //var c2 = document.querySelector('#c2');
-            //var c3 = document.querySelector('#c3');
+            var c2 = document.querySelector('#c2');
+            var c3 = document.querySelector('#c3');
 
             s1.computor = Behaviors.supply(1);
-            //s2.computor = Behaviors.supply(2);
-            //s3.computor = Behaviors.supply(3);
+            s2.computor = Behaviors.supply(2);
+            s3.computor = Behaviors.supply(3);
             c1.computor = Behaviors.sum;
-            //c2.computor = Behaviors.sum;
-            //c3.computor = Behaviors.multiply;
+            c2.computor = Behaviors.sum;
+            c3.computor = Behaviors.multiply;
 
             w1.setInput(s1, 'o0', true);
             w1.setOutput(c1, 'i0', true);
 
-            // w2.setInput(s2, 'o0', true);
-            // w2.setOutput(c1, 'i1', true);
+            w2.setInput(s2, 'o0', true);
+            w2.setOutput(c1, 'i1', true);
 
-            // w3.setInput(s3, 'o0', true);
-            // w3.setOutput(c3, 'i1', true);
+            w3.setInput(s3, 'o0', true);
+            w3.setOutput(c3, 'i1', true);
 
-            // w4.setInput(c1, 'o0', true);
-            // w4.setOutput(c3, 'i0', true);
+            w4.setInput(c1, 'o0', true);
+            w4.setOutput(c3, 'i0', true);
         });
     </script>
 </body>

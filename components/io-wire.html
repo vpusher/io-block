@@ -1,7 +1,7 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="../bower_components/core-splitter/core-splitter.html">
 
-<polymer-element name="io-wire" attributes="input output positions">
+<polymer-element name="io-wire" attributes="input output">
     <template>
         <style>
             :host {
@@ -53,12 +53,12 @@
         </style>
         <div horizontal layout class="wire">
             <div class="left 
-                {{shouldReverse(positions.input.x, positions.input.y, positions.output.x, positions.output.y) ? 'bottom' : ''}}">
+                {{shouldReverse(input.x, input.y, output.x, output.y) ? 'bottom' : ''}}">
                 &nbsp;
             </div>
             <core-splitter direction="left" ></core-splitter>
             <div flex class="right 
-                {{shouldReverse(positions.input.x, positions.input.y, positions.output.x, positions.output.y) ? 'top' : ''}}">
+                {{shouldReverse(input.x, input.y, output.x, output.y) ? 'top' : ''}}">
                 &nbsp;
             </div>
         </div>
@@ -69,33 +69,27 @@
     Polymer({
 
         observe: {
-            'input.block.position.x': 'inputPositionChanged',
-            'input.block.position.y': 'inputPositionChanged',
-            'output.block.position.x': 'outputPositionChanged',
-            'output.block.position.y': 'outputPositionChanged',
+            'input.block.x': 'inputPositionChanged',
+            'input.block.y': 'inputPositionChanged',
+            'output.block.x': 'outputPositionChanged',
+            'output.block.y': 'outputPositionChanged',
             'input.blockOutput.value': 'compute'
             //'output.blockInput.value': 'compute' // can't be triggered since already listen by blocks.
         },
 
         created: function () {
-            this.positions = {
-                input: {
-                    x: 0,
-                    y: 0
-                },
-                output: {
-                    x:0,
-                    y:0
-                }
-            };
 
             this.input = {
+                x: 0,
+                y: 0,
                 block: undefined,
                 blockPlug: undefined,
                 blockOutput: undefined
             };
 
             this.output = {
+                x: 0,
+                y: 0,
                 block: undefined,
                 blockPlug: undefined,
                 blockInput: undefined
@@ -110,20 +104,6 @@
         shouldReverse: function (ix, iy, ox, oy) {
             return (iy > oy) ? !(ix > ox) : (ix > ox);
         },
-
-        // inputPositionChanged: function (x, y) {
-        //     if (this.isInputPlugged()) {
-        //         var rect = this.input.block.$.container.querySelector('#' + this.input.blockPlug).getBoundingClientRect();
-        //         this.setInputPosition(rect.left + rect.width, rect.top + rect.height/2);
-        //     }
-        // },
-
-        // outputPositionChanged: function (x, y) {
-        //     if (this.isOutputPlugged()) {
-        //         var rect = this.output.block.$.container.querySelector('#' + this.output.blockPlug).getBoundingClientRect();
-        //         this.setOutputPosition(rect.left, rect.top + rect.height/2);
-        //     }
-        // },
 
         inputPositionChanged: function () {
             this.positionChanged(true);
@@ -183,13 +163,13 @@
         },
 
         setInputPosition: function (x, y) {
-            var ox = this.positions.output.x,
-                oy = this.positions.output.y,
+            var ox = this.output.x,
+                oy = this.output.y,
                 viewport = this.parentElement.getBoundingClientRect(),
                 style = this.style;
 
             if (typeof x === 'number') {
-                this.positions.input.x = x;
+                this.input.x = x;
                 if (x > ox) {
                     style.right = viewport.width - x +'px';
                 } else {
@@ -198,7 +178,7 @@
             }
 
             if (typeof y === 'number') {
-                this.positions.input.y = y;
+                this.input.y = y;
                 if (y > oy) {
                     style.bottom = viewport.height - y + 'px';
                 } else {
@@ -209,13 +189,13 @@
         },
 
         setOutputPosition: function (x, y) {
-            var ix = this.positions.input.x,
-                iy = this.positions.input.y,
+            var ix = this.input.x,
+                iy = this.input.y,
                 viewport = this.parentElement.getBoundingClientRect(),
                 style = this.style;
 
             if (typeof x === 'number') {
-                this.positions.output.x = x;
+                this.output.x = x;
                 if (x > ix) {
                     style.right = viewport.width - x +'px';
                 } else {
@@ -224,7 +204,7 @@
             }
 
             if (typeof y === 'number') {
-                this.positions.output.y = y;
+                this.output.y = y;
                 if (y > iy) {
                     style.bottom = viewport.height - y + 'px';
 
