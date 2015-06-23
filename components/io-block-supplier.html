@@ -1,0 +1,28 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+
+<polymer-element name="io-block-supplier" attributes="name icount ocount">
+    <template>
+        <style>
+            #amount {
+                width: 100%;
+            }
+        </style>
+        <input id="amount" is="core-input" type="number" preventinvalidinput="" placeholder="Value" on-change="{{compute}}">
+    </template>
+
+    <script>
+    Polymer({
+
+        name: 'Supplier',
+
+        icount: 0,
+
+        ocount: 1,
+
+        compute: function () {
+            return [parseInt(this.$.amount.value)];
+        }
+    });
+    </script>
+
+</polymer-element>

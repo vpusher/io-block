@@ -19,9 +19,18 @@
     <link rel="import" href="bower_components/core-drag-drop/core-drag-drop.html">
     <link rel="import" href="bower_components/paper-fab/paper-fab.html">
     <link rel="import" href="components/io-block.html">
+    <link rel="import" href="components/io-block-add.html">
+    <link rel="import" href="components/io-block-supplier.html">
+    <link rel="import" href="components/io-block-display.html">
     <link rel="import" href="components/io-wire.html">
 
     <style>
+
+    * {
+        -webkit-box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        box-sizing: border-box;
+    }
 
     html,body {
         height: 100%;
@@ -37,6 +46,10 @@
     #app #menu {
         background-color: #FFF;
     }
+
+/*    #app #menu #mainContainer {
+        overflow-x: auto;
+    }*/
 
     #app #content core-toolbar {
         background-color: #657ACF;
@@ -76,40 +89,40 @@
             <div id="canvas">
                 <core-drag-drop></core-drag-drop>
 
-                <io-wire id="w1"></io-wire>
+                <!--<io-wire id="w1"></io-wire>
                 <io-wire id="w2"></io-wire>
                 <io-wire id="w3"></io-wire>
-                <io-wire id="w4"></io-wire>
-
+                <io-wire id="w4"></io-wire>-->
+ 
                 <io-block
                     x="100"
                     y="100"
-                    id="s1"
-                    icount = "0">
+                    id="s1">
+                    <io-block-supplier></io-block-supplier>
                 </io-block>
 
                 <io-block
-                    id="s2"
+                    id="d1"
                     x="100"
-                    y="290"
-                    icount = "0">
+                    y="290">
+                    <io-block-display></io-block-display>
                 </io-block>
 
                 <io-block
                     id="s3"
                     x="100"
-                    y="500"
-                    icount = "0">
+                    y="500">
+                    <io-block-supplier></io-block-supplier>
                 </io-block>
 
                 <io-block
                     x="400"
                     y="150"
-                    icount = "2"
                     id="c1">
+                    <io-block-add></io-block-add>
                 </io-block>
 
-                <io-block
+                <!--<io-block
                     id="c2"
                     x="400"
                     y="400"
@@ -121,7 +134,7 @@
                     x="650"
                     y="300"
                     icount = "2">
-                </io-block>
+                </io-block>-->
 
             </div>
         </core-header-panel>
@@ -274,35 +287,35 @@
         window.addEventListener('resize', refresh);
 
         window.addEventListener('polymer-ready', function(e) {
-            var w1 = document.querySelector('#w1');
-            var w2 = document.querySelector('#w2');
-            var w3 = document.querySelector('#w3');
-            var w4 = document.querySelector('#w4');
-            var s1 = document.querySelector('#s1');
-            var s2 = document.querySelector('#s2');
-            var s3 = document.querySelector('#s3');
-            var c1 = document.querySelector('#c1');
-            var c2 = document.querySelector('#c2');
-            var c3 = document.querySelector('#c3');
+            // var w1 = document.querySelector('#w1');
+            // var w2 = document.querySelector('#w2');
+            // var w3 = document.querySelector('#w3');
+            // var w4 = document.querySelector('#w4');
+            // var s1 = document.querySelector('#s1');
+            // var s2 = document.querySelector('#s2');
+            // var s3 = document.querySelector('#s3');
+            // var c1 = document.querySelector('#c1');
+            // var c2 = document.querySelector('#c2');
+            // var c3 = document.querySelector('#c3');
 
-            s1.computor = Behaviors.supply(1);
-            s2.computor = Behaviors.supply(2);
-            s3.computor = Behaviors.supply(3);
-            c1.computor = Behaviors.sum;
-            c2.computor = Behaviors.sum;
-            c3.computor = Behaviors.multiply;
+            // s1.computor = Behaviors.supply(1);
+            // s2.computor = Behaviors.supply(2);
+            // s3.computor = Behaviors.supply(3);
+            // c1.computor = Behaviors.sum;
+            // c2.computor = Behaviors.sum;
+            // c3.computor = Behaviors.multiply;
 
-            w1.setInput(s1, 'o0', true);
-            w1.setOutput(c1, 'i0', true);
+            // w1.setInput(s1, 'o0', true);
+            // w1.setOutput(c1, 'i0', true);
 
-            w2.setInput(s2, 'o0', true);
-            w2.setOutput(c1, 'i1', true);
+            // w2.setInput(s2, 'o0', true);
+            // w2.setOutput(c1, 'i1', true);
 
-            w3.setInput(s3, 'o0', true);
-            w3.setOutput(c3, 'i1', true);
+            // w3.setInput(s3, 'o0', true);
+            // w3.setOutput(c3, 'i1', true);
 
-            w4.setInput(c1, 'o0', true);
-            w4.setOutput(c3, 'i0', true);
+            // w4.setInput(c1, 'o0', true);
+            // w4.setOutput(c3, 'i0', true);
         });
     </script>
 </body>

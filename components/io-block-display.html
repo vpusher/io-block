@@ -1,0 +1,28 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+
+<polymer-element name="io-block-display" attributes="name icount ocount">
+    <template>
+        <style>
+        </style>
+        <span>{{value}}</span>
+    </template>
+
+
+    <script>
+    Polymer({
+
+        name: 'Display',
+
+        icount: 1,
+
+        ocount: 0,
+
+        value: undefined,
+
+        compute: function (inputs) {
+            this.value = inputs[0];
+        }
+    });
+    </script>
+
+</polymer-element>

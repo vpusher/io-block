@@ -1,0 +1,26 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+
+<polymer-element name="io-block-add" attributes="name icount ocount">
+    <template>
+        <style>
+        </style>
+        <span>Addition +</span>
+    </template>
+
+
+    <script>
+    Polymer({
+
+        name: '+',
+
+        icount: 2,
+
+        ocount: 1,
+
+        compute: function (inputs) {
+            return [inputs[0] + inputs[1]];
+        }
+    });
+    </script>
+
+</polymer-element>
