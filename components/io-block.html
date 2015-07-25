@@ -1,245 +1,199 @@
+<!DOCTYPE HTML>
+
 <link rel="import" href="../bower_components/polymer/polymer.html">
-<link rel="import" href="../bower_components/core-toolbar/core-toolbar.html">
-<link rel="import" href="../bower_components/core-icon-button/core-icon-button.html">
-<link rel="import" href="../bower_components/core-header-panel/core-header-panel.html">
-<!-- <link rel="import" href="../bower_components/paper-checkbox/paper-checkbox.html"> -->
+<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../bower_components/paper-toolbar/paper-toolbar.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/paper-header-panel/paper-header-panel.html">
+<link rel="import" href="io-plug.html">
 
-<polymer-element name="io-block" draggable=false attributes="x y inputs outputs computor">
-    <template>
-        <style>
-            :host {
-                display: block;
-                position: absolute;
-                background-color: white;
-            }
+<dom-module id="io-block" draggable="false">
 
-            polyfill-next-selector { content: ':host > *' }
-            ::content > * {
-                overflow: hidden;
-                display: block;
-                width: 100%;
-                height: 100%;
-            }
+    <style>
+        :host {
+            display: block;
+            position: absolute;
+            background-color: white;
+        }
 
-            .header {
-                width: 150px;
-                min-height: 150px;
-            }
+        /*polyfill-next-selector { content: ':host > *' }
+        ::content > * {
+            overflow: hidden;
+            display: block;
+            width: 100%;
+            height: 100%;
+        }*/
 
-/*            .inputs, .outputs {
-                max-width: 30px
-            }
-*/
-            .input, .output {
-                margin-top: 15px;
-                position: relative;
-            } 
+        .content > ::content > * {
+            overflow: hidden;
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
 
-            .input label {
-                margin-left: 5px;
-            }
+        .flex {
+            @apply(--layout-flex);
+        }
 
-            .output label {
-                margin-right: 5px;
-            }
+        .header {
+            width: 150px;
+            min-height: 150px;
+        }
 
-            /* Checkboxes */
+        .plugs {
+            @apply(--layout-horizontal);
+            @apply(--layout-fit);
+        }
 
-            /* :before sert à créer la case à cocher */
-            [type="checkbox"]:not(:checked) + label:before,
-            [type="checkbox"]:checked + label:before {
-              content: '';
-              position: absolute;
-              /*top: 2px;*/
-              width: 17px; height: 17px; /* dim. de la case */
-              border: 1px solid #aaa;
-              background: #f8f8f8;
-              /*box-shadow: inset 0 1px 3px rgba(0,0,0,.3)*/ /* légère ombre interne */
-            }
+        .inputs, .outputs {
+            /*max-width: 30px;*/
+            @apply(--layout-vertical);
+        }
+    </style>
 
-            .input [type="checkbox"]:not(:checked) + label:before,
-            .input [type="checkbox"]:checked + label:before {
-                border-top-right-radius: 1px;
-                border-bottom-right-radius: 1px;
-                border-left: none;
-                left:-1px;
-            }
+    <template >
+        <paper-header-panel id="container" class="header" mode="seamed">
+            <paper-toolbar on-track="handleTrack">
+                <span class="flex">{{computor.name}}</span>
+                <paper-icon-button icon="close" on-tap="remove"></paper-icon-button>
+            </paper-toolbar>
 
-            .output [type="checkbox"]:not(:checked) + label:before,
-            .output [type="checkbox"]:checked + label:before {
-                border-top-left-radius: 1px;
-                border-bottom-left-radius: 1px;
-                border-right: none;
-                right:-1px;
-            }
-
-            /* :after Aspect général de la coche */
-            [type="checkbox"]:not(:checked) + label:after,
-            [type="checkbox"]:checked + label:after {
-              /*content: '✔';*/
-              content: '■';
-              position: absolute;
-              top: -1px;
-              font-size: 43px;
-              color: grey;
-              line-height: 19px;
-              /*transition: all .2s;*/ /* on prévoit une animation */
-            }
-
-            .input [type="checkbox"]:not(:checked) + label:after,
-            .input [type="checkbox"]:checked + label:after {
-              left: -5px;
-            }
-
-            .output [type="checkbox"]:not(:checked) + label:after,
-            .output [type="checkbox"]:checked + label:after {
-              right: -4px;
-            }
-
-            /* Aspect si "pas cochée" */
-            [type="checkbox"]:not(:checked) + label:after {
-              opacity: 0; /* coche invisible */
-              /*transform: scale(0);*/ /* mise à l'échelle à 0 */
-            }
-            /* Aspect si "cochée" */
-            [type="checkbox"]:checked + label:after {
-              opacity: 1; /* coche opaque */
-              /*transform: scale(1);*/ /* mise à l'échelle 1:1 */
-            }
-
-            /* aspect désactivée */
-            [type="checkbox"]:disabled:not(:checked) + label:before,
-            [type="checkbox"]:disabled:checked + label:before {
-              /*box-shadow: none;*/
-              border-color: #bbb;
-              /*background-color: #ddd;*/
-            }
-            /* styles de la coche (si cochée/désactivée) */
-            [type="checkbox"]:disabled:checked + label:after {
-              color: #999;
-            }
-            /* on style aussi le label quand désactivé */
-            [type="checkbox"]:disabled + label {
-              color: #aaa;
-            }
-
-            /* aspect au focus de l'élément */
-            /*[type="checkbox"]:checked:focus + label:before,
-            [type="checkbox"]:not(:checked):focus + label:before {
-              border: 1px dotted blue;
-            }*/
-        </style>
-
-        <core-header-panel id="container" class="header" mode="seamed">
-            <core-toolbar>
-                <span flex>{{computor.name ? computor.name : id}}</span>
-                <core-icon-button icon="close" on-tap="{{moreAction}}"></core-icon-button>
-            </core-toolbar>
-
-            <div horizontal layout fit>
+            <div class="plugs">
                 <!-- INPUTS -->
-                <div vertical layout class="inputs">
-                    <template repeat="{{input, index in inputs}}">
-                         <div id="i{{index}}" class="input" layout horizontal>
-                            <input id="ci{{index}}-{{id}}" type="checkbox" on-click="{{onToggleInput}}" checked?="{{input.wire}}"></input>
-                            <label for="ci{{index}}-{{id}}">{{index}}</label>
-                        </div>
+                <div class="inputs">
+                    <template is="dom-repeat" items="{{inputNames}}" as="name">
+                        <io-plug type="input" name="{{name}}"></io-plug>
                     </template>
                 </div>
 
-                <div flex>
+                <div class="flex content">
                     <content id="computor" select="*"></content>
                 </div>
 
                 <!-- OUTPUTS -->
-                <div vertical layout class="outputs">
-                    <template repeat="{{output, index in outputs}}">
-                         <div id="o{{index}}" class="output" layout horizontal reverse>
-                            <input id="co{{index}}-{{id}}" type="checkbox" on-click="{{onToggleOutput}}" checked?="{{output.wire}}"></input>
-                            <label for="co{{index}}-{{id}}">{{index}}</label>
-                        </div>
+                <div class="outputs">
+                    <template  is="dom-repeat" items="{{outputNames}}" as="name">
+                        <io-plug type="output" name="{{name}}"></io-plug>
                     </template>
                 </div>
             </div>
-        </core-header-panel>
-
+        </paper-header-panel>
     </template>
-
 
     <script>
     Polymer({
 
-        x: 0,
+        is: 'io-block',
 
-        y: 0,
-
-        computor: undefined,
-
-        observe: {
-            'computor': 'compute',
-            'inputs[0].value': 'compute',
-            'inputs[1].value': 'compute',
-        },
-
-        // created: function () {
-        // },
-
-        domReady: function () {
-            var i = 0,
-                inputs = [],
-                outputs = [],
-                computors = this.$.computor.getDistributedNodes(),
-                computeFn;
-
-            if (computors.length > 0) {
-                this.computor = computors[0];
-
-                while (i < this.computor.icount) {
-                    inputs.push({});
-                    i++;
-                }
-
-                i = 0;
-
-                while (i < this.computor.ocount) {
-                    outputs.push({});
-                    i++;
-                }
-
-                this.inputs = inputs;
-                this.outputs = outputs;
-
-                // Here.
-                computeFn = this.computor.compute;
-                this.compute = this.computor.compute = this.compute.bind(this, computeFn);
-
-                // this.computor.compute = function () {
-                //     this.compute.call(compute);
-                // }
+        properties: {
+            x: {
+                type: Number,
+                value: 0,
+                observer: 'xChanged'
+            },
+            y: {
+                type: Number,
+                value: 0,
+                observer: 'yChanged'
+            },
+            computor: {
+                type: Object,
+                observer: 'compute',
+            },
+            inputNames: {
+                type: Array,
+                observer: 'inputsChanged'
+            },
+            outputNames: {
+                type: Array,
+                observer: 'outputsChanged'
+            },
+            inputs: {
+                type: Array
+            },
+            outputs: {
+                type: Array
             }
         },
 
-        xChanged: function (oldx, newx) {
-            this.setPosition(newx, this.y);
-        },
+        observers: [
+            'compute(inputs.*)'
+        ],
 
-        yChanged: function (oldy, newy) {
-            this.setPosition(this.x, newy);
-        },
-
-        setPosition: function (x, y) {
-            var style = this.style;
-
-            if (style.transform !== undefined) {
-                style.transform = 'translate(' + x +'px,' + y + 'px)';
-            } else if (style.webkitTransform !== undefined) {
-                style.webkitTransform = 'translate(' + x +'px,' + y + 'px)';
+        handleTrack: function(e) {
+            var target = Polymer.dom(e).rootTarget;
+            switch(e.detail.state) {
+                case 'start':
+                    if (target) {
+                        this.dx =  e.detail.x - this.x;
+                        this.dy =  e.detail.y - this.y;
+                    }
+                    break;
+                case 'track':
+                    if (target) {
+                        this.x = e.detail.x - this.dx;
+                        this.y = e.detail.y - this.dy;
+                    }
+                    break;
+                case 'end':
+                    break;
             }
+        },
+
+        inputsChanged: function () {
+            this.async(function () {
+                this.inputs = Polymer.dom(this.root).querySelectorAll('io-plug[type="input"]');
+            }, 1000);
+        },
+
+        outputsChanged: function () {
+            this.async(function () {
+                this.outputs = Polymer.dom(this.root).querySelectorAll('io-plug[type="output"]');
+            }, 1000);
+        },
+
+        ready: function () {
+            this.async(function () {
+                var computors = Polymer.dom(this.$.computor).getDistributedNodes(),
+                    computeFn;
+
+                if (computors.length > 0) {
+                    this.computor = computors[0];
+
+                    this.inputNames =  this.computor.inputs;
+                    this.outputNames =  this.computor.outputs;
+
+                    // Get the compute fonction from the nested computor.
+                    computeFn = this.computor.compute;
+                    this.compute = this.computor.compute = this.compute.bind(this, computeFn);
+
+                }
+            });
+        },
+
+        xChanged: function (newx, oldx) {
+            this.translate3d(newx + 'px', this.y + 'px', 0);
+            this.getInputWires().forEach(function(w) {
+                w.notifyPath('outputPlug.block.x', newx);
+            });
+            this.getOutputWires().forEach(function(w) {
+                w.notifyPath('inputPlug.block.x', newx);
+            });
+        },
+
+        yChanged: function (newy, oldy) {
+            this.translate3d(this.x + 'px', newy + 'px', 0);
+            this.getInputWires().forEach(function(w) {
+                w.notifyPath('outputPlug.block.y', newy);
+            });
+            this.getOutputWires().forEach(function(w) {
+                w.notifyPath('inputPlug.block.y', newy);
+            });
         },
 
         isInputPlugged: function (index) {
             if (typeof index === 'number') {
-                return !!this.inputs[index].wire;
+                return !!this.inputs[index].isPlugged();
             } else {
                 return false;
             }
@@ -247,123 +201,54 @@
 
         isOutputPlugged: function (index) {
             if (typeof index === 'number') {
-                return !!this.outputs[index].wire;
+                return !!this.outputs[index].isPlugged();
             } else {
                 return false;
             }
         },
 
-        onToggleInput: function (event, detail, sender) {
-            var index = IO.getIndex(sender.parentElement.id),
-                wire;
-
-            // Remove wire if already plugged/checked
-            if (!sender.checked && (wire = this.inputs[index].wire)) {
-                this.unsetInput(index, true);
-                wire.unsetInput(true);
-                wire.remove();
-                if (wire === Manager.currentWire) {
-                    Manager.endAddWire();
+        getInputWires: function () {
+            var wires = [];
+            this.inputs && this.inputs.forEach(function(i) {
+                if (i.wire) {
+                    wires.push(i.wire);
                 }
-            // Handle new wire if not plugged/checked.
-            } else {
-                wire = Manager.currentWire;
-                // 1) First plug: start add wire.
-                if (!wire) {
-                    wire = Manager.beginAddWire();
-                    wire.setOutput(this, sender.parentElement.id, true);
-                // 2) Second plug: stop add wire. Only plug wire output if not already plug (avoid wire between 2 outputs).
-                } else if (!wire.isOutputPlugged()) {
-                    Manager.endAddWire();
-                    wire.setOutput(this, sender.parentElement.id, true);
-                } else {
-                    event.preventDefault();
+            });
+            return wires;
+        },
+
+        getOutputWires: function () {
+            var wires = [];
+            this.outputs && this.outputs.forEach(function(o) {
+                if (o.wire) {
+                    wires.push(o.wire);
                 }
-            }
-        },
-
-        onToggleOutput: function (event, detail, sender) {
-            var index = IO.getIndex(sender.parentElement.id),
-                wire;
-
-            //Remove wire if already plugged/checked
-            if (!sender.checked && (wire = this.outputs[index].wire)) {
-                this.unsetOutput(index, true);
-                wire.unsetOutput(true);
-                wire.remove();
-                if (wire === Manager.currentWire) {
-                    Manager.endAddWire();
-                }
-            // Handle new wire if not plugged/checked.
-            } else {
-                wire = Manager.currentWire;
-                // 1) First plug: start add wire.
-                if (!wire) {
-                    wire = Manager.beginAddWire();
-                    wire.setInput(this, sender.parentElement.id, true);
-                // 2) Second plug: stop add wire. Only plug wire input if not already plugged (avoid wire between 2 inputs).
-                } else if (!wire.isInputPlugged()) {
-                    Manager.endAddWire();
-                    wire.setInput(this, sender.parentElement.id, true);
-                } else {
-                    event.preventDefault();
-                }
-            }
-        },
-
-        setInput: function (wire, inputRef, shouldPlugWire) {
-            var index = IO.getIndex(inputRef);
-            this.inputs[index].wire = wire;
-            if (shouldPlugWire) {
-                wire.setOutput(this, 'i' + index, false);
-            }
-        },
-
-        unsetInput: function (inputRef, shouldUnplugWire) {
-            var index = IO.getIndex(inputRef),
-                input = this.inputs[index];
-
-            if (shouldUnplugWire) {
-                input.wire && input.wire.unsetOutput(false);
-            }
-
-            // Reset the input in order the recompile the template.
-            this.inputs[index] = {};
-        },
-
-        setOutput: function (wire, outputRef, shouldPlugWire) {
-            var index = IO.getIndex(outputRef);
-            this.outputs[index].wire = wire;
-            if (shouldPlugWire) {
-                wire.setInput(this, 'o' + index, false);
-            }
-        },
-
-        unsetOutput: function (outputRef, shouldUnplugWire) {
-            var index = IO.getIndex(outputRef),
-                output = this.outputs[index];
-
-            if (shouldUnplugWire) {
-                output.wire && output.wire.unsetInput(false);
-            }
-
-            // Reset the output in order the recompile the template + save the last computed value.
-            this.outputs[index] = {value: output.value};
+            });
+            return wires;
         },
 
         compute: function (fn) {
-            var outputValues;
-            if (this.computor && fn) {
-                outputValues = fn.call(this.computor, this.inputs.map(function(i) {
-                    return i.value;
-                }));
+            var inputValues = [], outputValues;
+            if (this.computor && typeof fn === 'function') {
 
-                this.outputs.forEach(function(o, index) {
-                    o.value = outputValues[index];
+                this.inputs.forEach(function(i) {
+                    inputValues[i.name] = i.value;  // By name.
+                    inputValues.push(i.value);      // By index.
+                });
+
+                outputValues = fn.call(this.computor, inputValues);
+
+                this.outputs && this.outputs.forEach(function(o, index) {
+                    // Here we set the `value` from the `wire` in order the trigger wire's path observers (if `wire` available).
+                    if (o.wire) {
+                        o.wire.set('inputPlug.value', outputValues[index]);
+                    } else {
+                        o.set('value', outputValues[index]);
+                    }
                 });
             }
         }
     });
     </script>
 
-</polymer-element>
+</dom-module>

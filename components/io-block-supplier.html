@@ -1,23 +1,50 @@
+<!DOCTYPE HTML>
+
 <link rel="import" href="../bower_components/polymer/polymer.html">
 
-<polymer-element name="io-block-supplier" attributes="name icount ocount">
+<dom-module id="io-block-supplier">
+
+    <style>
+    :host * {
+        -webkit-box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        box-sizing: border-box;
+    }
+
+    #amount {
+        width: 100%;
+    }
+    </style>
+
     <template>
-        <style>
-            #amount {
-                width: 100%;
-            }
-        </style>
-        <input id="amount" is="core-input" type="number" preventinvalidinput="" placeholder="Value" on-change="{{compute}}">
+        <input id="amount" is="core-input" type="number" preventinvalidinput="" placeholder="Value" on-change="compute">
     </template>
 
     <script>
     Polymer({
 
-        name: 'Supplier',
+        is: 'io-block-supplier',
 
-        icount: 0,
-
-        ocount: 1,
+        properties: {
+            name: {
+                type: String,
+                value: 'Supplier'
+            },
+            inputs: {
+                type: Array,
+                readOnly: true,
+                value: function () {
+                    return [];
+                }
+            },
+            outputs: {
+                type: Array,
+                readOnly: true,
+                value: function () {
+                    return ['count'];
+                }
+            },
+        },
 
         compute: function () {
             return [parseInt(this.$.amount.value)];
@@ -25,4 +52,4 @@
     });
     </script>
 
-</polymer-element>
+</dom-module>

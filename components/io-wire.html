@@ -1,108 +1,118 @@
+<!DOCTYPE HTML>
+
 <link rel="import" href="../bower_components/polymer/polymer.html">
-<link rel="import" href="../bower_components/core-splitter/core-splitter.html">
+<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
 
-<polymer-element name="io-wire" attributes="input output">
+<dom-module id="io-wire">
+
+    <style>
+        :host {
+            position: absolute;
+            /*z-index: 1;*/
+            min-width: 2px;
+            min-height: 2px;
+        }
+
+        .wire {
+            overflow: visible;
+            background-color: transparent;
+            @apply(--layout-horizontal);
+        }
+
+        .left {
+            border-top: 2px solid gray;
+            border-bottom: none;
+        }
+
+        .left.bottom {
+            border-top: none;
+            border-bottom: 2px solid gray;
+        }
+
+        .right {
+            border-top: none;
+            border-bottom: 2px solid gray;
+            @apply(--layout-flex);
+        }
+
+        .right.top {
+            border-bottom: none;
+            border-top: 2px solid gray;
+        }
+
+    </style>
+
     <template>
-        <style>
-            :host {
-                width: auto;
-                position: absolute;
-                top: 50px;
-                left: 50px;
-                /*z-index: 1;*/
-                min-width: 2px;
-                min-height: 2px;
-            }
-
-            .wire {
-                width: 100%;
-                height: 100%;
-                background-color: transparent;
-            }
-
-            .left {
-                border-top: 2px solid gray;
-                border-bottom: none;
-            }
-
-            .left.bottom {
-                border-top: none;
-                border-bottom: 2px solid gray;
-            }
-
-            .right {
-                border-top: none;
-                border-bottom: 2px solid gray;
-            }
-
-            .right.top {
-                border-bottom: none;
-                border-top: 2px solid gray;
-            }
-
-            core-splitter {
-                background: none;
-                box-shadow: none;
-                width: 0px;
-                border-left: 2px solid gray;
-            }
-
-            core-splitter:hover {
-                border-left: 2px solid gray;
-            }
-        </style>
-        <div horizontal layout class="wire">
-            <div class="left 
-                {{shouldReverse(input.x, input.y, output.x, output.y) ? 'bottom' : ''}}">
-                &nbsp;
-            </div>
-            <core-splitter direction="left" ></core-splitter>
-            <div flex class="right 
-                {{shouldReverse(input.x, input.y, output.x, output.y) ? 'top' : ''}}">
-                &nbsp;
-            </div>
-        </div>
+        <svg class="wire" width$="{{width}}" height$="{{height}}">
+            <path d$="{{computeEquation(xi, yi, xo, yo)}}" stroke="grey" stroke-width="4" fill="none"></path>
+        </svg>
     </template>
 
 
     <script>
     Polymer({
 
-        observe: {
-            'input.block.x': 'inputPositionChanged',
-            'input.block.y': 'inputPositionChanged',
-            'output.block.x': 'outputPositionChanged',
-            'output.block.y': 'outputPositionChanged',
-            'input.blockOutput.value': 'compute'
-            //'output.blockInput.value': 'compute' // can't be triggered since already listen by blocks.
+        is: 'io-wire',
+
+        properties: {
+            xi: {
+                type: Number,
+                value: 0
+            },
+            yi: {
+                type: Number,
+                value: 0
+            },
+            xo: {
+                type: Number,
+                value: 0
+            },
+            yo: {
+                type: Number,
+                value: 0
+            },
+            width: {
+                type: Number,
+                computed: 'computeWidth(xi, xo)'
+            },
+            height: {
+                type: Number,
+                computed: 'computeHeight(yi, yo)'
+            },
+            inputPlug: Object,
+            outputPlug: Object
         },
 
-        created: function () {
+        observers: [
+            'inputPositionChanged(inputPlug.block.x, inputPlug.block.y)',
+            'outputPositionChanged(outputPlug.block.x, outputPlug.block.y)',
+            'compute(inputPlug.value)',
+            'compute(outputPlug)',
+        ],
 
-            this.input = {
-                x: 0,
-                y: 0,
-                block: undefined,      // Remote block element.
-                blockPlug: undefined,  // Remote block output reference ("o3", "o5", ...).
-                blockOutput: undefined // Remote block output object.
-            };
-
-            this.output = {
-                x: 0,
-                y: 0,
-                block: undefined,     // Remote block element.
-                blockPlug: undefined, // Remote block input reference ("i1", "i4", ...).
-                blockInput: undefined // Remote block input object.
-            };
+        computeWidth: function (xi, xo) {
+            return Math.abs(xi - xo);
         },
 
-        /**
-         *   _      _
-         * _|   or   |_
-         *
-         */
-        shouldReverse: function (ix, iy, ox, oy) {
-            return (iy > oy) ? !(ix > ox) : (ix > ox);
+        computeHeight: function (yi, yo) {
+            return Math.abs(yi - yo);
+        },
+
+        computeEquation: function (xi, yi, xo, yo) {
+            // Return 'M 0 0 q 250 0 250 250 q 0 250 250 250' for e.g.
+            var dx = Math.abs(xi - xo),
+                dy = Math.abs(yi - yo),
+                dx2 = dx/2,
+                dy2 = dy/2,
+                reverse = (yi > yo && xi < xo) || (xi > xo && yi < yo);
+
+            return 'M {0} {1} q {2} {3} {4} {5} q {6} {7} {8} {9}'.format(
+                0,   (reverse ? dy : 0),
+                dx2, 0,
+                dx2, (reverse ? -dy2 : dy2),
+                0,   (reverse ? -dy2 : dy2),
+                dx2, (reverse ? -dy2 : dy2)
+            );
         },
 
         inputPositionChanged: function () {
@@ -115,11 +125,14 @@
 
         positionChanged: function (isInput) {
 
-            var rectI, rectO;
+            var rectI, rectO,
+            inputBlock = this.inputPlug && this.inputPlug.block,
+            outputBlock = this.outputPlug && this.outputPlug.block,
+            headerOffset = 64 + 9; // header's height + plug's height / 2
 
             // FIXME: need to compute the position relative to the canvas (i.e minus tool-bar height = -65).
-            function getRect(io) {
-                var rect = io.block.$.container.querySelector('#' + io.blockPlug).getBoundingClientRect();
+            function getRect(plug) {
+                var rect = plug.getBoundingClientRect();
                 return {
                     top: rect.top - 65,
                     right: rect.right,
@@ -132,145 +145,128 @@
 
             // Only input plugged
             if (this.isInputPlugged() && !this.isOutputPlugged()) {
-                rectI = getRect(this.input);
-                this.setInputPosition(rectI.left + rectI.width, rectI.top + rectI.height/2);
+
+                rectI = getRect(inputBlock);
+                this.setInputPosition(inputBlock.x + rectI.width, inputBlock.y + this.inputPlug.offsetTop + headerOffset);
             // Only output plugged
             } else if (!this.isInputPlugged() && this.isOutputPlugged()) {
-                rectO = getRect(this.output);
-                this.setOutputPosition(rectO.left, rectO.top + rectO.height/2);
+                rectO = getRect(outputBlock);
+                this.setOutputPosition(outputBlock.x, outputBlock.y + this.outputPlug.offsetTop + headerOffset);
             // Both plugged
             } else if (this.isInputPlugged() && this.isOutputPlugged()) {
-                rectI = getRect(this.input);
-                rectO = getRect(this.output);
+                rectI = getRect(inputBlock);
+                rectO = getRect(outputBlock);
 
                 // FIXME: find a way to avoid this test (the instruction order should not matter).
                 if (isInput) {
-                    this.setInputPosition(rectI.left + rectI.width, rectI.top + rectI.height/2);
-                    this.setOutputPosition(rectO.left, rectO.top + rectO.height/2);
+                    this.setInputPosition(inputBlock.x + rectI.width, inputBlock.y + this.inputPlug.offsetTop + headerOffset);
+                    this.setOutputPosition(outputBlock.x, outputBlock.y + this.outputPlug.offsetTop + headerOffset);
                 } else {
-                    this.setOutputPosition(rectO.left, rectO.top + rectO.height/2);
-                    this.setInputPosition(rectI.left + rectI.width, rectI.top + rectI.height/2);
+                    this.setOutputPosition(outputBlock.x, outputBlock.y + this.outputPlug.offsetTop + headerOffset);
+                    this.setInputPosition(inputBlock.x + rectI.width, inputBlock.y + this.inputPlug.offsetTop + headerOffset);
                 }
             }
         },
 
-        isInputPlugged: function () {
-            return !!(this.input.block && this.input.blockPlug);
-        },
-
-        isOutputPlugged: function () {
-            return !!(this.output.block && this.output.blockPlug);
-        },
-
         setInputPosition: function (x, y) {
-            var ox = this.output.x,
-                oy = this.output.y,
-                viewport = this.parentElement.getBoundingClientRect(),
-                style = this.style;
+            var xo = this.xo,
+                yo = this.yo,
+                tx, ty;
 
             if (typeof x === 'number') {
-                this.input.x = x;
-                if (x > ox) {
-                    style.right = viewport.width - x +'px';
+                this.xi = x;
+                if (x > xo) {
+                    tx = xo;
                 } else {
-                    style.left = x +'px';
+                    tx = x;
                 }
             }
 
             if (typeof y === 'number') {
-                this.input.y = y;
-                if (y > oy) {
-                    style.bottom = viewport.height - y + 'px';
+                this.yi = y;
+                if (y > yo) {
+                    ty = yo;
                 } else {
-                    style.top = y + 'px';
+                    ty = y;
                 }
             }
+
+            this.translate3d(tx + 'px', ty + 'px', 0);
 
         },
 
         setOutputPosition: function (x, y) {
-            var ix = this.input.x,
-                iy = this.input.y,
-                viewport = this.parentElement.getBoundingClientRect(),
-                style = this.style;
+            var xi = this.xi,
+                yi = this.yi,
+                tx, ty;
 
             if (typeof x === 'number') {
-                this.output.x = x;
-                if (x > ix) {
-                    style.right = viewport.width - x +'px';
+                this.xo = x;
+                if (x > xi) {
+                    tx = xi;
                 } else {
-                    style.left = x +'px';
+                    tx = x;
                 }
             }
 
             if (typeof y === 'number') {
-                this.output.y = y;
-                if (y > iy) {
-                    style.bottom = viewport.height - y + 'px';
-
+                this.yo = y;
+                if (y > yi) {
+                    ty = yi;
                 } else {
-                    style.top = y + 'px';
+                    ty = y;
                 }
             }
 
+            this.translate3d(tx + 'px', ty + 'px', 0);
         },
 
-        setInput: function (block, ioref, shouldPlugBlock) {
-            var wInput = this.input;
-            if (block && IO.isOutput(ioref)) {
-                wInput.block = block;
-                wInput.blockPlug = ioref;
-                wInput.blockOutput = block.outputs[IO.getIndex(ioref)];
-                if (shouldPlugBlock) {
-                    IO.isInput(ioref) && block.setInput(this, ioref, false);
-                    IO.isOutput(ioref) && block.setOutput(this, ioref, false);
-                }
-                this.compute();
+        isInputPlugged: function () {
+            return !!this.inputPlug;
+        },
+
+        isOutputPlugged: function () {
+            return !!this.outputPlug;
+        },
+
+        setInput: function (plug) {
+            if (plug.isOutput()) {
+                plug.wire = this;
+                this.set('inputPlug', plug);
             }
         },
 
-        unsetInput: function (shouldUnplugBlock) {
-            var wInput = this.input;
-            if(shouldUnplugBlock && this.isInputPlugged()) {
-                wInput.block.unsetOutput(this.input.blockPlug, false);
-            }
-
-            wInput.block = undefined;
-            wInput.blockPlug = undefined;
-            wInput.blockOutput = undefined;
-        },
-
-        setOutput: function (block, ioref, shouldPlugBlock) {
-            var wOutput = this.output;
-            if (block && IO.isInput(ioref)) {
-                wOutput.blockPlug = ioref;
-                wOutput.block = block;
-                wOutput.blockInput = block.inputs[IO.getIndex(ioref)];
-                if (shouldPlugBlock) {
-                    IO.isInput(ioref) && block.setInput(this, ioref, false);
-                    IO.isOutput(ioref) && block.setOutput(this, ioref, false);
-                }
-                this.compute();
+        unsetInput: function () {
+            var input = this.inputPlug;
+            if (input) {
+                input.wire = undefined;
+                this.set('inputPlug', undefined);
             }
         },
 
-        unsetOutput: function (shouldUnplugBlock) {
-            var wOutput = this.output;
-            if(shouldUnplugBlock && this.isOutputPlugged()) {
-                wOutput.block.unsetInput(this.output.blockPlug, false);
+        setOutput: function (plug) {
+            if (plug.isInput()) {
+                plug.wire = this;
+                this.set('outputPlug', plug);
             }
-            wOutput.block = undefined;
-            wOutput.blockPlug = undefined;
-            wOutput.blockInput = undefined;
+        },
+
+        unsetOutput: function () {
+            var output = this.outputPlug;
+            if (output) {
+                output.wire = undefined;
+                this.set('outputPlug', undefined);
+            }
         },
 
         compute: function () {
             if (this.isInputPlugged() && this.isOutputPlugged()) {
-                this.output.blockInput.value = this.input.blockOutput.value;
+                // Here we set the `value` from the `block` in order the trigger block's path observers.
+                this.outputPlug.block.set('inputs.' + this.outputPlug.getIndex() + '.value', this.inputPlug.value);
             }
         }
 
     });
     </script>
 
-</polymer-element>
+</dom-module>

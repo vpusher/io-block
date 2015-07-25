@@ -1,28 +1,54 @@
+<!DOCTYPE HTML>
+
 <link rel="import" href="../bower_components/polymer/polymer.html">
 
-<polymer-element name="io-block-display" attributes="name icount ocount">
+<dom-module id="io-block-display">
+
+    <style>
+    :host * {
+        -webkit-box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        box-sizing: border-box;
+    }
+    </style>
+
     <template>
-        <style>
-        </style>
         <span>{{value}}</span>
     </template>
-
 
     <script>
     Polymer({
 
-        name: 'Display',
+        is: 'io-block-display',
 
-        icount: 1,
-
-        ocount: 0,
-
-        value: undefined,
+        properties: {
+            name: {
+                type: String,
+                value: 'Display'
+            },
+            inputs: {
+                type: Array,
+                readOnly: true,
+                value: function () {
+                    return ['i0'];
+                }
+            },
+            outputs: {
+                type: Array,
+                readOnly: true,
+                value: function () {
+                    return [];
+                }
+            },
+            value: {
+                type: Object
+            }
+        },
 
         compute: function (inputs) {
-            this.value = inputs[0];
+            this.value = inputs[0] === undefined ? 'undefined' : inputs[0];
         }
     });
     </script>
 
-</polymer-element>
+</dom-module>

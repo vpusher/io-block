@@ -1,21 +1,46 @@
+<!DOCTYPE HTML>
+
 <link rel="import" href="../bower_components/polymer/polymer.html">
 
-<polymer-element name="io-block-add" attributes="name icount ocount">
+<dom-module id="io-block-add">
+
+    <style>
+    :host * {
+        -webkit-box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        box-sizing: border-box;
+    }
+    </style>
+
     <template>
-        <style>
-        </style>
         <span>Addition +</span>
     </template>
-
 
     <script>
     Polymer({
 
-        name: '+',
+        is: 'io-block-add',
 
-        icount: 2,
-
-        ocount: 1,
+        properties: {
+            name: {
+                type: String,
+                value: '+'
+            },
+            inputs: {
+                type: Array,
+                readOnly: true,
+                value: function () {
+                    return ['i0', 'i1'];
+                }
+            },
+            outputs: {
+                type: Array,
+                readOnly: true,
+                value: function () {
+                    return ['sum'];
+                }
+            },
+        },
 
         compute: function (inputs) {
             return [inputs[0] + inputs[1]];
@@ -23,4 +48,4 @@
     });
     </script>
 
-</polymer-element>
+</dom-module>
