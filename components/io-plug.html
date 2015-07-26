@@ -25,18 +25,16 @@
         margin-right: 5px;
     }
 
-    /* Checkboxes */
+    /* Plugs */
 
     /* :before sert à créer la case à cocher */
     [type="checkbox"]:not(:checked) + label:before,
     [type="checkbox"]:checked + label:before {
       content: '';
       position: absolute;
-      /*top: 2px;*/
-      width: 17px; height: 17px; /* dim. de la case */
+      width: 17px; height: 17px;
       border: 1px solid #aaa;
       background: #f8f8f8;
-      /*box-shadow: inset 0 1px 3px rgba(0,0,0,.3)*/ /* légère ombre interne */
     }
 
     :host([type="input"]) [type="checkbox"]:not(:checked) + label:before,
@@ -44,7 +42,7 @@
         border-top-right-radius: 1px;
         border-bottom-right-radius: 1px;
         border-left: none;
-        left:-1px;
+        left:0px;
     }
 
     :host([type="output"]) [type="checkbox"]:not(:checked) + label:before,
@@ -52,67 +50,62 @@
         border-top-left-radius: 1px;
         border-bottom-left-radius: 1px;
         border-right: none;
-        right:-1px;
+        right:0px;
     }
 
-    /* :after Aspect général de la coche */
+    /* :after sert à créer la coche */
     [type="checkbox"]:not(:checked) + label:after,
     [type="checkbox"]:checked + label:after {
-      /*content: '✔';*/
-      content: '■';
+      content: '';
       position: absolute;
-      top: -1px;
-      font-size: 43px;
-      color: grey;
-      line-height: 19px;
-      /*transition: all .2s;*/ /* on prévoit une animation */
+      top: 2px;
+      background-color: grey;
+      width: 16px;
+      height: 15px;
+      transition: all .2s; /* on prévoit une animation */
     }
 
     :host([type="input"]) [type="checkbox"]:not(:checked) + label:after,
     :host([type="input"]) [type="checkbox"]:checked + label:after {
-      left: -5px;
+      left: 0;
     }
 
     :host([type="output"]) [type="checkbox"]:not(:checked) + label:after,
     :host([type="output"]) [type="checkbox"]:checked + label:after {
-      right: -4px;
+      right: 0;
     }
 
     /* Aspect si "pas cochée" */
     [type="checkbox"]:not(:checked) + label:after {
       opacity: 0; /* coche invisible */
-      /*transform: scale(0);*/ /* mise à l'échelle à 0 */
     }
     /* Aspect si "cochée" */
     [type="checkbox"]:checked + label:after {
       opacity: 1; /* coche opaque */
-      /*transform: scale(1);*/ /* mise à l'échelle 1:1 */
     }
 
-    /* aspect désactivée */
+    /* Aspect désactivée */
     [type="checkbox"]:disabled:not(:checked) + label:before,
     [type="checkbox"]:disabled:checked + label:before {
-      /*box-shadow: none;*/
       border-color: #bbb;
-      /*background-color: #ddd;*/
     }
-    /* styles de la coche (si cochée/désactivée) */
+    /* Aspect de la coche si cochée et désactivée */
     [type="checkbox"]:disabled:checked + label:after {
       color: #999;
     }
-    /* on style aussi le label quand désactivé */
+    /* Aspect du label quand désactivé */
     [type="checkbox"]:disabled + label {
       color: #aaa;
     }
 
     label {
-        color: #BBB;
+        color: #bbb;
         font-size: 11px;
         line-height: 17px;
         font-family: Roboto;
     }
 
-    /* aspect au focus de l'élément */
+    /* Aspect au focus de l'élément */
     /*[type="checkbox"]:checked:focus + label:before,
     [type="checkbox"]:not(:checked):focus + label:before {
       border: 1px dotted blue;

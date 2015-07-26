@@ -7,7 +7,7 @@
 <link rel="import" href="../bower_components/paper-header-panel/paper-header-panel.html">
 <link rel="import" href="io-plug.html">
 
-<dom-module id="io-block" draggable="false">
+<dom-module id="io-block">
 
     <style>
         :host {
@@ -38,6 +38,7 @@
         .header {
             width: 150px;
             min-height: 150px;
+            cursor: move;
         }
 
         .plugs {
@@ -52,6 +53,7 @@
     </style>
 
     <template >
+        <paper-material id="alt" elevation="1">
         <paper-header-panel id="container" class="header" mode="seamed">
             <paper-toolbar on-track="handleTrack">
                 <span class="flex">{{computor.name}}</span>
@@ -61,7 +63,7 @@
             <div class="plugs">
                 <!-- INPUTS -->
                 <div class="inputs">
-                    <template is="dom-repeat" items="{{inputNames}}" as="name">
+                    <template id="tinputs" is="dom-repeat" items="{{inputNames}}" as="name">
                         <io-plug type="input" name="{{name}}"></io-plug>
                     </template>
                 </div>
@@ -72,12 +74,13 @@
 
                 <!-- OUTPUTS -->
                 <div class="outputs">
-                    <template  is="dom-repeat" items="{{outputNames}}" as="name">
+                    <template id="toutputs" is="dom-repeat" items="{{outputNames}}" as="name">
                         <io-plug type="output" name="{{name}}"></io-plug>
                     </template>
                 </div>
             </div>
         </paper-header-panel>
+        </paper-material>
     </template>
 
     <script>
@@ -101,18 +104,22 @@
                 observer: 'compute',
             },
             inputNames: {
-                type: Array,
-                observer: 'inputsChanged'
+                type: Array
             },
             outputNames: {
-                type: Array,
-                observer: 'outputsChanged'
+                type: Array
             },
             inputs: {
-                type: Array
+                type: Array,
+                value: function () {
+                    return [];
+                }
             },
             outputs: {
-                type: Array
+                type: Array,
+                value: function () {
+                    return [];
+                }
             }
         },
 
@@ -120,36 +127,49 @@
             'compute(inputs.*)'
         ],
 
+        listeners : {
+            'dom-change': 'domChanged'
+        },
+
         handleTrack: function(e) {
             var target = Polymer.dom(e).rootTarget;
             switch(e.detail.state) {
                 case 'start':
                     if (target) {
+                        this.$.alt.elevation = 4;
+                        this.style.zIndex = 1;
                         this.dx =  e.detail.x - this.x;
                         this.dy =  e.detail.y - this.y;
+                        e.stopPropagation();
                     }
                     break;
                 case 'track':
                     if (target) {
+                        if (Polymer.dom(this).parentNode.id === 'menu' &&
+                            e.detail.hover() === Polymer.dom(window.document).querySelector('io-app').$.canvas) {
+                            Polymer.dom(window.document).querySelector('io-app').$.canvas.appendChild(this);
+                            this.dx = Math.max(this.dx + e.detail.x, 0); // FIXME: the proper way is to add the width of the left panel.
+                        }
                         this.x = e.detail.x - this.dx;
                         this.y = e.detail.y - this.dy;
+                        e.stopPropagation();
                     }
                     break;
                 case 'end':
+                    this.$.alt.elevation = 1;
+                    this.style.zIndex = '';
+                    e.stopPropagation();
                     break;
             }
         },
 
-        inputsChanged: function () {
-            this.async(function () {
+        domChanged: function (e) {
+            e = Polymer.dom(e);
+            if (e.path[0] === this.$.tinputs) {
                 this.inputs = Polymer.dom(this.root).querySelectorAll('io-plug[type="input"]');
-            }, 1000);
-        },
-
-        outputsChanged: function () {
-            this.async(function () {
+            } else if (e.path[0] === this.$.toutputs) {
                 this.outputs = Polymer.dom(this.root).querySelectorAll('io-plug[type="output"]');
-            }, 1000);
+            }
         },
 
         ready: function () {
