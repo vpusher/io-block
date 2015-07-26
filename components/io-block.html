@@ -16,13 +16,9 @@
             background-color: white;
         }
 
-        /*polyfill-next-selector { content: ':host > *' }
-        ::content > * {
-            overflow: hidden;
-            display: block;
-            width: 100%;
-            height: 100%;
-        }*/
+        .flex {
+            @apply(--layout-flex);
+        }
 
         .content > ::content > * {
             overflow: hidden;
@@ -31,39 +27,37 @@
             height: 100%;
         }
 
-        .flex {
-            @apply(--layout-flex);
-        }
-
-        .header {
+        #panel {
             width: 150px;
             min-height: 150px;
+        }
+
+        #panelHeader  {
             cursor: move;
         }
 
-        .plugs {
+        #panelContent {
             @apply(--layout-horizontal);
             @apply(--layout-fit);
         }
 
         .inputs, .outputs {
-            /*max-width: 30px;*/
             @apply(--layout-vertical);
         }
     </style>
 
     <template >
         <paper-material id="alt" elevation="1">
-        <paper-header-panel id="container" class="header" mode="seamed">
-            <paper-toolbar on-track="handleTrack">
+        <paper-header-panel id="panel" mode="seamed">
+            <paper-toolbar id="panelHeader" on-track="handleTrack">
                 <span class="flex">{{computor.name}}</span>
                 <paper-icon-button icon="close" on-tap="remove"></paper-icon-button>
             </paper-toolbar>
 
-            <div class="plugs">
+            <div id="panelContent">
                 <!-- INPUTS -->
                 <div class="inputs">
-                    <template id="tinputs" is="dom-repeat" items="{{inputNames}}" as="name">
+                    <template id="inputsTemplate" is="dom-repeat" items="{{inputNames}}" as="name">
                         <io-plug type="input" name="{{name}}"></io-plug>
                     </template>
                 </div>
@@ -74,7 +68,7 @@
 
                 <!-- OUTPUTS -->
                 <div class="outputs">
-                    <template id="toutputs" is="dom-repeat" items="{{outputNames}}" as="name">
+                    <template id="outputsTemplate" is="dom-repeat" items="{{outputNames}}" as="name">
                         <io-plug type="output" name="{{name}}"></io-plug>
                     </template>
                 </div>
@@ -165,9 +159,9 @@
 
         domChanged: function (e) {
             e = Polymer.dom(e);
-            if (e.path[0] === this.$.tinputs) {
+            if (e.path[0] === this.$.inputsTemplate) {
                 this.inputs = Polymer.dom(this.root).querySelectorAll('io-plug[type="input"]');
-            } else if (e.path[0] === this.$.toutputs) {
+            } else if (e.path[0] === this.$.outputsTemplate) {
                 this.outputs = Polymer.dom(this.root).querySelectorAll('io-plug[type="output"]');
             }
         },
