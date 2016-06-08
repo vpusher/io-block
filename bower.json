@@ -1,8 +1,9 @@
 {
   "name": "io",
   "version": "0.0.1",
+  "main": "index.html",
   "authors": [
-    "Florian Maffini <florian.maffini@gmail.com>"
+    "Florian Maffini <florian.maffini@free.fr>"
   ],
   "description": "IO Blocks",
   "keywords": [
@@ -22,8 +23,12 @@
     "tests"
   ],
   "dependencies": {
-    "polymer": "Polymer/polymer#^1.2.3",
-    "iron-elements": "PolymerElements/iron-elements#^1.0.4",
-    "paper-elements": "PolymerElements/paper-elements#^1.0.6"
+    "polymer": "Polymer/polymer#^1.5.0",
+    "iron-elements": "PolymerElements/iron-elements#^1.0.10",
+    "paper-elements": "PolymerElements/paper-elements#^1.0.7"
+  },
+  "devDependencies": {
+    "web-component-tester": "^4.0.0",
+    "webcomponentsjs": "webcomponents/webcomponentsjs#^0.7.0"
   }
 }
