@@ -2,7 +2,7 @@
 
 <link rel="import" href="../bower_components/polymer/polymer.html">
 
-<dom-module id="io-block-add">
+<dom-module id="io-block-multiply">
 
     <style>
     :host * {
@@ -13,18 +13,18 @@
     </style>
 
     <template>
-        <span>+</span>
+        <span>&times;</span>
     </template>
 
     <script>
     Polymer({
 
-        is: 'io-block-add',
+        is: 'io-block-multiply',
 
         properties: {
             name: {
                 type: String,
-                value: 'Add'
+                value: 'Multiply'
             },
             inputs: {
                 type: Array,
@@ -37,13 +37,13 @@
                 type: Array,
                 readOnly: true,
                 value: function () {
-                    return ['sum'];
+                    return ['product'];
                 }
             },
         },
 
         compute: function (inputs) {
-            return [inputs[0] + inputs[1]];
+            return [inputs[0] * inputs[1]];
         }
     });
     </script>

@@ -5,19 +5,34 @@
 <link rel="import" href="../bower_components/paper-toolbar/paper-toolbar.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../bower_components/paper-header-panel/paper-header-panel.html">
+<link rel="import" href="../bower_components/paper-material/paper-material.html">
 <link rel="import" href="io-plug.html">
 
 <dom-module id="io-block">
 
     <style>
         :host {
-            display: block;
+            display: inline-block;
             position: absolute;
             background-color: white;
         }
 
+        :host([catalog]) {
+            position: relative;
+            -webkit-transform: none;
+            transform: none;
+        }
+
+        :host([hidden]) {
+            display: none;
+        }
+
         .flex {
             @apply(--layout-flex);
+        }
+
+        .relative {
+            position: relative;
         }
 
         .content > ::content > * {
@@ -47,37 +62,56 @@
     </style>
 
     <template >
-        <paper-material id="alt" elevation="1">
-        <paper-header-panel id="panel" mode="seamed">
-            <paper-toolbar id="panelHeader" on-track="handleTrack">
-                <span class="flex">{{computor.name}}</span>
-                <paper-icon-button icon="close" on-tap="remove"></paper-icon-button>
-            </paper-toolbar>
+        <div class="relative">
+            <paper-material id="alt" elevation="1">
+                <paper-header-panel id="panel" mode="seamed">
+                    <paper-toolbar id="panelHeader" on-track="handleTrack">
+                        <span class="flex">{{computor.name}}</span>
+                        <paper-icon-button icon="close" on-tap="remove"></paper-icon-button>
+                    </paper-toolbar>
 
-            <div id="panelContent">
-                <!-- INPUTS -->
-                <div class="inputs">
-                    <template id="inputsTemplate" is="dom-repeat" items="{{inputNames}}" as="name">
-                        <io-plug type="input" name="{{name}}"></io-plug>
-                    </template>
-                </div>
+                    <div id="panelContent">
+                        <!-- INPUTS -->
+                        <div class="inputs">
+                            <template id="inputsTemplate" is="dom-repeat" items="{{inputNames}}" as="name">
+                                <io-plug type="input" name="{{name}}"></io-plug>
+                            </template>
+                        </div>
 
-                <div class="flex content">
-                    <content id="computor" select="*"></content>
-                </div>
+                        <div class="flex content">
+                            <content id="computor" select="*"></content>
+                        </div>
 
-                <!-- OUTPUTS -->
-                <div class="outputs">
-                    <template id="outputsTemplate" is="dom-repeat" items="{{outputNames}}" as="name">
-                        <io-plug type="output" name="{{name}}"></io-plug>
-                    </template>
-                </div>
-            </div>
-        </paper-header-panel>
-        </paper-material>
+                        <!-- OUTPUTS -->
+                        <div class="outputs">
+                            <template id="outputsTemplate" is="dom-repeat" items="{{outputNames}}" as="name">
+                                <io-plug type="output" name="{{name}}"></io-plug>
+                            </template>
+                        </div>
+                    </div>
+                </paper-header-panel>
+            </paper-material>
+        </div>
     </template>
 
     <script>
+
+    function getOffsets(elem) {
+        var offsetLeft = 0,
+            offsetTop = 0;
+
+        do {
+          if (!isNaN(elem.offsetLeft)) {
+              offsetLeft += elem.offsetLeft;
+          }
+          if (!isNaN(elem.offsetTop)) {
+              offsetTop += elem.offsetTop;
+          }
+        } while (elem = elem.offsetParent);
+
+        return {top: offsetTop, left: offsetLeft};
+    }
+
     Polymer({
 
         is: 'io-block',
@@ -114,6 +148,11 @@
                 value: function () {
                     return [];
                 }
+            },
+            catalog: {
+                type: Boolean,
+                value: false,
+                reflectToAttribute: true
             }
         },
 
@@ -130,29 +169,60 @@
             switch(e.detail.state) {
                 case 'start':
                     if (target) {
-                        this.$.alt.elevation = 4;
-                        this.style.zIndex = 1;
-                        this.dx =  e.detail.x - this.x;
-                        this.dy =  e.detail.y - this.y;
-                        e.stopPropagation();
+                        //if (Polymer.dom(this).parentNode.id === 'menu') {
+                        if (this.catalog) {
+                            var parent = Polymer.dom(this).parentNode; // Keep ref on parent
+                            this.style.zIndex = 10;
+                            this.$.alt.elevation = 4;
+                            var parentLeft = Polymer.dom(this).parentNode.$.mainPanel.offsetLeft;
+                            var parentTop = Polymer.dom(this).parentNode.$.mainPanel.offsetTop;
+                            var left = this.offsetLeft;
+                            var top = this.offsetTop;
+                            this.dx =  e.detail.x - this.x - parentLeft - left;
+                            this.dy =  e.detail.y - this.y - parentTop - top;
+                            this.x = parentLeft + left;
+                            this.y = parentTop + top;
+                            var cloneBlock =  Polymer.dom(this).cloneNode(true);
+                            //TODO: support import through attribute in order to createElement instead of cloning it.
+                            Polymer.dom(parent).insertBefore(cloneBlock, this);
+                            Polymer.dom(document.body).appendChild(this);
+                        } else {
+                            this.$.alt.elevation = 4;
+                            this.style.zIndex = 1;
+                            this.dx =  e.detail.x - this.x;
+                            this.dy =  e.detail.y - this.y;
+                            e.stopPropagation();
+                        }
                     }
                     break;
                 case 'track':
                     if (target) {
-                        if (Polymer.dom(this).parentNode.id === 'menu' &&
-                            e.detail.hover() === Polymer.dom(window.document).querySelector('io-app').$.canvas) {
-                            Polymer.dom(window.document).querySelector('io-app').$.canvas.appendChild(this);
-                            this.dx = Math.max(this.dx + e.detail.x, 0); // FIXME: the proper way is to add the width of the left panel.
-                        }
                         this.x = e.detail.x - this.dx;
                         this.y = e.detail.y - this.dy;
                         e.stopPropagation();
                     }
                     break;
                 case 'end':
-                    this.$.alt.elevation = 1;
-                    this.style.zIndex = '';
-                    e.stopPropagation();
+                    if (target) {
+
+                        var canvas = document.querySelector('io-app').$.canvas,
+                            offsets = getOffsets(canvas);
+
+                        this.$.alt.elevation = 1;
+                        this.style.zIndex = '';
+
+                        //if (this.catalog && document.querySelector('io-app').root.elementsFromPoint(e.detail.x, e.detail.y).indexOf(document.querySelector('io-app').$.canvas) !== -1) {
+                        if (this.catalog && e.detail.x > offsets.left) {
+                            canvas.appendChild(this);
+                            this.catalog = false;
+                            //this.dx = Math.max(this.dx + e.detail.x, 0); // FIXME: the proper way is to add the width of the left panel.
+                            this.x = this.x - offsets.left;
+                            this.y = this.y - offsets.top;
+                        } else if (this.catalog){
+                            this.remove();
+                        }
+                        e.stopPropagation();
+                    }
                     break;
             }
         },
@@ -261,6 +331,18 @@
                     }
                 });
             }
+        },
+
+        remove: function () {
+            this.getInputWires().forEach(function (wire) {
+                wire.remove();
+            });
+
+            this.getOutputWires().forEach(function (wire) {
+                wire.remove();
+            });
+
+            Element.prototype.remove.call(this);
         }
     });
     </script>

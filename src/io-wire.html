@@ -264,6 +264,12 @@
                 // Here we set the `value` from the `block` in order the trigger block's path observers.
                 this.outputPlug.block.set('inputs.' + this.outputPlug.getIndex() + '.value', this.inputPlug.value);
             }
+        },
+
+        remove: function() {
+            this.unsetInput();
+            this.unsetOutput();
+            Element.prototype.remove.call(this);
         }
 
     });
