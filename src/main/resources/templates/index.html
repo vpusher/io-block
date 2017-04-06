@@ -11,7 +11,8 @@
         <meta name="theme-color" content="#fff">
         <link rel="manifest" href="/manifest.json">
 
-        <script>
+        <script th:inline="javascript">
+        /*<![CDATA[*/
         window.Polymer = window.Polymer || {};
         window.Polymer.dom = 'shadow';
         window.Polymer.lazyRegister = true;
@@ -46,9 +47,10 @@
             });
           };
         }
+        /*]]>*/
         </script>
 
-        <link rel="import" href="/src/io-app.html">
+        <link rel="import" href="/components/io-app.html">
 
         <style>
         * {

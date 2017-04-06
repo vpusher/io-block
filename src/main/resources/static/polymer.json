@@ -1,0 +1,12 @@
+{
+  "entrypoint": "index.html",
+  "shell": "components/io-app.html",
+  "fragments": [
+    "components/io-block.html",
+    "components/io-block-add.html",
+    "components/io-block-display.html",
+    "components/io-block-supplier.html",
+    "components/io-plug.html",
+    "components/io-wire.html"
+  ]
+}
