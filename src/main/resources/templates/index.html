@@ -1,6 +1,6 @@
 <!DOCTYPE HTML>
 
-<html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
     <head>
         <title>I/O Blocks</title>
 
@@ -50,7 +50,7 @@
         /*]]>*/
         </script>
 
-        <link rel="import" href="/components/io-app.html">
+        <link rel="import" href="/elements/io-app.html">
 
         <style>
         * {
@@ -70,7 +70,22 @@
     </head>
 
     <body unresolved>
-        <io-app></io-app>
+        <io-app>
+            <io-block
+                th:each="block: ${blocks}"
+                th:id="'_' + ${block.id}"
+                th:x="${block.x}"
+                th:y="${block.y}"
+                th:utext="'<' + ${block.computor} + '></' + ${block.computor} + '>'">
+            </io-block>
+            <io-wire
+                    th:each="wire: ${wires}"
+                    th:id="${wire.id}"
+                    th:x="${block.x}"
+                    th:y="${block.y}"
+                    th:utext="'<' + ${block.computor} + '></' + ${block.computor} + '>'">
+            </io-wire>
+        </io-app>
     </body>
 
 </html>

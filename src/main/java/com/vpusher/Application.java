@@ -86,15 +86,15 @@ public class Application {
             userService.update(roy);
             userService.update(craig);
 
-            Project project1 = new Project("project 1");
-            Project project2 = new Project("project 1");
+            Project project1 = new Project("project1");
+            Project project2 = new Project("project2");
             projectService.update(project1);
             projectService.update(project2);
 
-            Block b1 = new Block();
-            Block b2 = new Block();
-            Block b3 = new Block();
-            Block b4 = new Block();
+            Block b1 = new Block("b1", "io-block-add", 0, 0);
+            Block b2 = new Block("b2", "io-block-display", 200, 250);
+            Block b3 = new Block("b3", "io-block-supplier", 70, 100);
+            Block b4 = new Block("b4", "io-block-supplier", 50, 50);
             blockService.update(b1);
             blockService.update(b2);
             blockService.update(b3);

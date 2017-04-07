@@ -29,8 +29,11 @@
         margin: 10px;
     }
 
-    #content paper-toolbar {
-        background-color: #657ACF;
+    #menu paper-toolbar,
+    #content paper-toolbar,
+    #add-action {
+        background-color: rgb(88, 88, 88);
+        color: rgb(255, 211, 51);
     }
 
     #content #canvas {
@@ -64,7 +67,7 @@
                 <paper-input placeholder="search" noLabelFloat value="{{searchQuery}}">
                     <iron-icon icon="search" prefix></iron-icon>
                 </paper-input>
-                <io-block catalog> 
+                <io-block catalog>
                     <io-block-supplier></io-block-supplier>
                 </io-block>
                 <io-block catalog>
@@ -96,7 +99,10 @@
                     <io-wire id="w3"></io-wire>
                     <io-wire id="w4"></io-wire>-->
 
-                    <io-block
+                    <content selector="io-block"></content>
+                    <content selector="io-wire"></content>
+
+                    <!--<io-block
                         x="100"
                         y="100"
                         id="s1">
@@ -122,7 +128,7 @@
                         y="150"
                         id="c1">
                         <io-block-add></io-block-add>
-                    </io-block>
+                    </io-block>-->
 
                     <!--<io-block
                         id="c2"
@@ -141,7 +147,9 @@
                 </div>
             </paper-header-panel>
         </paper-drawer-panel>
-        <paper-fab id="add-action" icon="add" on-click="addBlock" ></paper-fab>
+        <a tabindex="-1" href="/new">
+            <paper-fab id="add-action" icon="add" on-click="addBlock" title="New project" ></paper-fab>
+        </a>
     </template>
 
     <script>

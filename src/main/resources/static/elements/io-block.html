@@ -49,6 +49,17 @@
 
         #panelHeader  {
             cursor: move;
+            background-color: rgb(88, 88, 88);
+            -webkit-touch-callout: none; /* iOS Safari */
+            -webkit-user-select: none; /* Safari */
+            -moz-user-select: none; /* Firefox */
+            -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome and Opera */
+        }
+
+        #panelHeader paper-icon-button {
+            color: rgb(255, 211, 51);
         }
 
         #panelContent {
@@ -67,7 +78,9 @@
                 <paper-header-panel id="panel" mode="seamed">
                     <paper-toolbar id="panelHeader" on-track="handleTrack">
                         <span class="flex">{{computor.name}}</span>
-                        <paper-icon-button icon="close" on-tap="remove"></paper-icon-button>
+                        <template is="dom-if" if="{{!catalog}}">
+                            <paper-icon-button icon="close" on-tap="remove"></paper-icon-button>
+                        </template>
                     </paper-toolbar>
 
                     <div id="panelContent">

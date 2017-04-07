@@ -20,8 +20,24 @@ public class Block {
 
     private String name;
 
+    private String computor;
+
+    private int x;
+
+    private int y;
+
     @Relationship(type = "LINKED_TO")
     private Set<Wire> wires = new HashSet<>();
+
+    public Block() {
+    }
+
+    public Block(String name, String computor, int x, int y) {
+        this.name = name;
+        this.computor = computor;
+        this.x = x;
+        this.y = y;
+    }
 
     public Long getId() {
         return id;
@@ -37,6 +53,30 @@ public class Block {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getComputor() {
+        return computor;
+    }
+
+    public void setComputor(String computor) {
+        this.computor = computor;
+    }
+
+    public int getX() {
+        return x;
+    }
+
+    public void setX(int x) {
+        this.x = x;
+    }
+
+    public int getY() {
+        return y;
+    }
+
+    public void setY(int y) {
+        this.y = y;
     }
 
     public Set<Wire> getWires() {
