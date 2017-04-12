@@ -35,6 +35,10 @@
             position: relative;
         }
 
+        .content {
+            width: 0;
+        }
+
         .content > ::content > * {
             overflow: hidden;
             display: block;
@@ -204,7 +208,7 @@
                             this.style.zIndex = 1;
                             this.dx =  e.detail.x - this.x;
                             this.dy =  e.detail.y - this.y;
-                            e.stopPropagation();
+                            //e.stopPropagation();
                         }
                     }
                     break;
@@ -212,7 +216,7 @@
                     if (target) {
                         this.x = e.detail.x - this.dx;
                         this.y = e.detail.y - this.dy;
-                        e.stopPropagation();
+                        //e.stopPropagation();
                     }
                     break;
                 case 'end':
@@ -234,7 +238,7 @@
                         } else if (this.catalog){
                             this.remove();
                         }
-                        e.stopPropagation();
+                        //e.stopPropagation();
                     }
                     break;
             }
@@ -260,7 +264,7 @@
                     this.inputNames =  this.computor.inputs;
                     this.outputNames =  this.computor.outputs;
 
-                    // Get the compute fonction from the nested computor.
+                    // Get the compute function from the nested computor.
                     computeFn = this.computor.compute;
                     this.compute = this.computor.compute = this.compute.bind(this, computeFn);
 
@@ -325,7 +329,8 @@
         },
 
         compute: function (fn) {
-            var inputValues = [], outputValues;
+            var inputValues = [], outputValues,
+                that = this;
             if (this.computor && typeof fn === 'function') {
 
                 this.inputs.forEach(function(i) {
@@ -335,15 +340,26 @@
 
                 outputValues = fn.call(this.computor, inputValues);
 
-                this.outputs && this.outputs.forEach(function(o, index) {
-                    // Here we set the `value` from the `wire` in order the trigger wire's path observers (if `wire` available).
-                    if (o.wire) {
-                        o.wire.set('inputPlug.value', outputValues[index]);
-                    } else {
-                        o.set('value', outputValues[index]);
-                    }
-                });
+                if (outputValues instanceof Promise) {
+                    outputValues.then(this.send.bind(this), function () {
+                        console.warn('Block ' + that.computor.name + ' (' + that.id + ') could not compute the result for inputs: ' + inputValues.join(','));
+                    })
+                } else {
+                    this.send(outputValues);
+                }
+
             }
+        },
+
+        send: function(outputValues) {
+            this.outputs && this.outputs.forEach(function(o, index) {
+                // Here we set the `value` from the `wire` in order the trigger wire's path observers (if `wire` available).
+                if (o.wire) {
+                    o.wire.set('inputPlug.value', outputValues[index]);
+                } else {
+                    o.set('value', outputValues[index]);
+                }
+            });
         },
 
         remove: function () {

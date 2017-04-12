@@ -19,6 +19,15 @@
             @apply(--layout-horizontal);
         }
 
+        .wire path {
+            transition: stroke 0.5s ease;
+            stroke: grey;
+        }
+
+        :host([active]) .wire path {
+            stroke: #ffb860;
+        }
+
         .left {
             border-top: 2px solid gray;
             border-bottom: none;
@@ -80,7 +89,12 @@
                 computed: 'computeHeight(yi, yo)'
             },
             inputPlug: Object,
-            outputPlug: Object
+            outputPlug: Object,
+            active:  {
+                type: Boolean,
+                value: false,
+                reflectToAttribute: true
+            }
         },
 
         observers: [
@@ -130,7 +144,7 @@
             outputBlock = this.outputPlug && this.outputPlug.block,
             headerOffset = 64 + 9; // header's height + plug's height / 2
 
-            // FIXME: need to compute the position relative to the canvas (i.e minus tool-bar height = -65).
+            // FIXME: need to compute the position relative to the canvas (i.e minus toolbar height = -65).
             function getRect(plug) {
                 var rect = plug.getBoundingClientRect();
                 return {
@@ -261,8 +275,15 @@
 
         compute: function () {
             if (this.isInputPlugged() && this.isOutputPlugged()) {
+                var that = this;
                 // Here we set the `value` from the `block` in order the trigger block's path observers.
                 this.outputPlug.block.set('inputs.' + this.outputPlug.getIndex() + '.value', this.inputPlug.value);
+                // Highlight the wire
+                clearTimeout(this._activeTimeout);
+                this._activeTimeout = setTimeout(function() {
+                    that.active = false;
+                }, 700)
+                this.active = true;
             }
         },
 

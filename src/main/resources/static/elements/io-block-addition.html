@@ -2,7 +2,7 @@
 
 <link rel="import" href="../bower_components/polymer/polymer.html">
 
-<dom-module id="io-block-add">
+<dom-module id="io-block-addition">
 
     <style>
     :host * {
@@ -19,18 +19,18 @@
     <script>
     Polymer({
 
-        is: 'io-block-add',
+        is: 'io-block-addition',
 
         properties: {
             name: {
                 type: String,
-                value: 'Add'
+                value: 'Addition'
             },
             inputs: {
                 type: Array,
                 readOnly: true,
                 value: function () {
-                    return ['i0', 'i1'];
+                    return ['addend1', 'addend2'];
                 }
             },
             outputs: {

@@ -1,0 +1,60 @@
+<!DOCTYPE HTML>
+
+<link rel="import" href="../bower_components/polymer/polymer.html">
+
+<dom-module id="io-block-delay">
+
+    <style>
+        :host * {
+            -webkit-box-sizing: border-box;
+            -moz-box-sizing: border-box;
+            box-sizing: border-box;
+        }
+
+        #delay {
+            width: 100%;
+        }
+    </style>
+
+    <template>
+        <input id="delay" is="core-input" value="0" type="number" preventinvalidinput="" placeholder="Value">
+    </template>
+
+    <script>
+        Polymer({
+
+            is: 'io-block-delay',
+
+            properties: {
+                name: {
+                    type: String,
+                    value: 'Delayer'
+                },
+                inputs: {
+                    type: Array,
+                    readOnly: true,
+                    value: function () {
+                        return ['value'];
+                    }
+                },
+                outputs: {
+                    type: Array,
+                    readOnly: true,
+                    value: function () {
+                        return ['delayed'];
+                    }
+                }
+            },
+
+            compute: function (inputs) {
+                var that = this;
+                return new Promise(function (resolve, reject) {
+                    setTimeout(function () {
+                        resolve(inputs);
+                    }, parseFloat(that.$.delay.value));
+                });
+            }
+        });
+    </script>
+
+</dom-module>

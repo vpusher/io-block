@@ -2,7 +2,7 @@
 
 <link rel="import" href="../bower_components/polymer/polymer.html">
 
-<dom-module id="io-block-substract">
+<dom-module id="io-block-multiplication">
 
     <style>
     :host * {
@@ -13,37 +13,37 @@
     </style>
 
     <template>
-        <span>-</span>
+        <span>&times;</span>
     </template>
 
     <script>
     Polymer({
 
-        is: 'io-block-substract',
+        is: 'io-block-multiplication',
 
         properties: {
             name: {
                 type: String,
-                value: 'Substract'
+                value: 'Multiplication'
             },
             inputs: {
                 type: Array,
                 readOnly: true,
                 value: function () {
-                    return ['i0', 'i1'];
+                    return ['multiplier', 'multiplicand'];
                 }
             },
             outputs: {
                 type: Array,
                 readOnly: true,
                 value: function () {
-                    return ['difference'];
+                    return ['product'];
                 }
             },
         },
 
         compute: function (inputs) {
-            return [inputs[0] - inputs[1]];
+            return [inputs[0] * inputs[1]];
         }
     });
     </script>

@@ -7,14 +7,6 @@
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../bower_components/paper-fab/paper-fab.html">
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
-<link rel="import" href="io-block.html">
-<link rel="import" href="io-block-add.html">
-<link rel="import" href="io-block-substract.html">
-<link rel="import" href="io-block-multiply.html">
-<link rel="import" href="io-block-divide.html">
-<link rel="import" href="io-block-supplier.html">
-<link rel="import" href="io-block-display.html">
-<link rel="import" href="io-wire.html">
 
 <dom-module id="io-app">
 
@@ -59,7 +51,7 @@
     </style>
 
     <template>
-        <paper-drawer-panel forceNarrow="true">
+        <paper-drawer-panel forceNarrow="true" disable-swipe>
             <paper-header-panel id="menu" drawer>
                 <paper-toolbar>
                     <div>Menu</div>
@@ -71,19 +63,28 @@
                     <io-block-supplier></io-block-supplier>
                 </io-block>
                 <io-block catalog>
+                    <io-block-delay></io-block-delay>
+                </io-block>
+                <io-block catalog>
                     <io-block-display></io-block-display>
                 </io-block>
                 <io-block catalog>
-                    <io-block-add></io-block-add>
+                    <io-block-addition></io-block-addition>
                 </io-block>
                 <io-block catalog>
-                    <io-block-substract></io-block-substract>
+                    <io-block-subtraction></io-block-subtraction>
                 </io-block>
                 <io-block catalog>
-                    <io-block-multiply></io-block-multiply>
+                    <io-block-multiplication></io-block-multiplication>
                 </io-block>
                 <io-block catalog>
-                    <io-block-divide></io-block-divide>
+                    <io-block-division></io-block-division>
+                </io-block>
+                <io-block catalog>
+                    <io-block-clock></io-block-clock>
+                </io-block>
+                <io-block catalog>
+                    <io-block-curve></io-block-curve>
                 </io-block>
             </paper-header-panel>
             <paper-header-panel id="content" main>

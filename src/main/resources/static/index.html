@@ -49,6 +49,18 @@
         </script>
 
         <link rel="import" href="elements/io-app.html">
+        <link rel="import" href="elements/io-wire.html">
+        <link rel="import" href="elements/io-block.html">
+        <link rel="import" href="elements/io-block-addition.html">
+        <link rel="import" href="elements/io-block-subtraction.html">
+        <link rel="import" href="elements/io-block-multiplication.html">
+        <link rel="import" href="elements/io-block-division.html">
+        <link rel="import" href="elements/io-block-supplier.html">
+        <link rel="import" href="elements/io-block-display.html">
+        <link rel="import" href="elements/io-block-delay.html">
+        <link rel="import" href="elements/io-block-clock.html">
+        <link rel="import" href="elements/io-block-curve.html">
+
 
         <style>
         * {
@@ -77,10 +89,24 @@
             </io-block>
 
             <io-block
+                    x="150"
+                    y="190"
+                    id="d1">
+                <io-block-display></io-block-display>
+            </io-block>
+
+            <io-block
+                    x="80"
+                    y="120"
+                    id="t1">
+                <io-block-division></io-block-division>
+            </io-block>
+
+            <io-block
                     id="d1"
                     x="100"
                     y="290">
-                <io-block-display></io-block-display>
+                <io-block-curve></io-block-curve>
             </io-block>
 
             <io-block
@@ -94,7 +120,7 @@
                     x="400"
                     y="150"
                     id="c1">
-                <io-block-add></io-block-add>
+                <io-block-addition></io-block-addition>
             </io-block>
         </io-app>
     </body>

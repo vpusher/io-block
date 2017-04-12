@@ -1,0 +1,75 @@
+<!DOCTYPE HTML>
+
+<link rel="import" href="../bower_components/polymer/polymer.html">
+
+<dom-module id="io-block-clock">
+
+    <style>
+        :host * {
+            -webkit-box-sizing: border-box;
+            -moz-box-sizing: border-box;
+            box-sizing: border-box;
+        }
+
+        #interval {
+            width: 100%;
+        }
+    </style>
+
+    <template>
+        <input id="interval" is="core-input" value="0" type="number" preventinvalidinput="" placeholder="Interval" on-change="configure">
+    </template>
+
+    <script>
+        Polymer({
+
+            is: 'io-block-clock',
+
+            properties: {
+                name: {
+                    type: String,
+                    value: 'Clock'
+                },
+                inputs: {
+                    type: Array,
+                    readOnly: true,
+                    value: function () {
+                        return [];
+                    }
+                },
+                outputs: {
+                    type: Array,
+                    readOnly: true,
+                    value: function () {
+                        return ['time'];
+                    }
+                }
+            },
+
+            ready: function() {
+                this.time = 0;
+                this.configure();
+            },
+
+            configure: function() {
+                var that = this,
+                    interval = parseFloat(this.$.interval.value);
+
+                clearInterval(this.fn);
+
+                if (interval > 0) {
+                    this.fn = setInterval(function () {
+                        that.compute();
+                    }, interval);
+                }
+
+            },
+
+            compute: function(inputs) {
+                this.time++;
+                return [this.time];
+            }
+        });
+    </script>
+
+</dom-module>

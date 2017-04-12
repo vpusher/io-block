@@ -2,7 +2,7 @@
 
 <link rel="import" href="../bower_components/polymer/polymer.html">
 
-<dom-module id="io-block-divide">
+<dom-module id="io-block-division">
 
     <style>
     :host * {
@@ -19,31 +19,31 @@
     <script>
     Polymer({
 
-        is: 'io-block-divide',
+        is: 'io-block-division',
 
         properties: {
             name: {
                 type: String,
-                value: 'Divide'
+                value: 'Division'
             },
             inputs: {
                 type: Array,
                 readOnly: true,
                 value: function () {
-                    return ['i0', 'i1'];
+                    return ['dividend', 'divisor'];
                 }
             },
             outputs: {
                 type: Array,
                 readOnly: true,
                 value: function () {
-                    return ['quotient'];
+                    return ['quotient', 'remainder'];
                 }
             },
         },
 
         compute: function (inputs) {
-            return [inputs[0] / inputs[1]];
+            return [inputs['dividend'] / inputs['divisor'], inputs['dividend'] % inputs['divisor']];
         }
     });
     </script>
