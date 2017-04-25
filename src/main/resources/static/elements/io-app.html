@@ -12,6 +12,11 @@
 
     <style>
 
+    :host {
+        --primary-color: rgb(255, 211, 51);
+        --primary-text-color: #fff;
+    }
+
     #menu {
         background-color: #FFF;
         text-align: center;
@@ -21,9 +26,14 @@
         margin: 10px;
     }
 
+    #menu paper-toolbar paper-input {
+        text-align: left;
+        margin: auto;
+    }
+
     #menu paper-toolbar,
     #content paper-toolbar,
-    #add-action {
+    #new-project {
         background-color: rgb(88, 88, 88);
         color: rgb(255, 211, 51);
     }
@@ -41,7 +51,7 @@
         position: absolute;
     }
 
-    #add-action {
+    #new-project {
         position: absolute;
         bottom: 25px;
         right: 25px;
@@ -54,11 +64,10 @@
         <paper-drawer-panel forceNarrow="true" disable-swipe>
             <paper-header-panel id="menu" drawer>
                 <paper-toolbar>
-                    <div>Menu</div>
+                    <paper-input always-float-label label="Search" placeholder="display, delayer, ..." value="{{searchQuery}}">
+                        <iron-icon icon="search" suffix></iron-icon>
+                    </paper-input>
                 </paper-toolbar>
-                <paper-input placeholder="search" noLabelFloat value="{{searchQuery}}">
-                    <iron-icon icon="search" prefix></iron-icon>
-                </paper-input>
                 <io-block catalog>
                     <io-block-supplier></io-block-supplier>
                 </io-block>
@@ -85,6 +94,9 @@
                 </io-block>
                 <io-block catalog>
                     <io-block-curve></io-block-curve>
+                </io-block>
+                <io-block catalog>
+                    <io-block-sinus></io-block-sinus>
                 </io-block>
             </paper-header-panel>
             <paper-header-panel id="content" main>
@@ -149,7 +161,7 @@
             </paper-header-panel>
         </paper-drawer-panel>
         <a tabindex="-1" href="/new">
-            <paper-fab id="add-action" icon="add" on-click="addBlock" title="New project" ></paper-fab>
+            <paper-fab id="new-project" icon="add" title="New project" ></paper-fab>
         </a>
     </template>
 

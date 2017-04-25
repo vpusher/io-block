@@ -1,0 +1,51 @@
+<!DOCTYPE HTML>
+
+<link rel="import" href="../bower_components/polymer/polymer.html">
+
+<dom-module id="io-block-sinus">
+
+    <style>
+        :host * {
+            -webkit-box-sizing: border-box;
+            -moz-box-sizing: border-box;
+            box-sizing: border-box;
+        }
+    </style>
+
+    <template>
+        <span>Sin</span>
+    </template>
+
+    <script>
+        Polymer({
+
+            is: 'io-block-sinus',
+
+            properties: {
+                name: {
+                    type: String,
+                    value: 'Sinus'
+                },
+                inputs: {
+                    type: Array,
+                    readOnly: true,
+                    value: function () {
+                        return ['i'];
+                    }
+                },
+                outputs: {
+                    type: Array,
+                    readOnly: true,
+                    value: function () {
+                        return ['sin(i)'];
+                    }
+                }
+            },
+
+            compute: function (inputs) {
+                return [ Math.sin(inputs[0]) ];
+            }
+        });
+    </script>
+
+</dom-module>
