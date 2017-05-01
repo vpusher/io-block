@@ -88,8 +88,22 @@
                 type: Number,
                 computed: 'computeHeight(yi, yo)'
             },
-            inputPlug: Object,
-            outputPlug: Object,
+            inputBlock: {
+                type: String,
+                observer: 'inputBlockChanged'
+            },
+            outputBlock: {
+                type: String,
+                observer: 'outputBlockChanged'
+            },
+            inlet: {
+                type: Object,
+                observer: 'inletChanged'
+            },
+            outlet: {
+                type: Object,
+                observer: 'outletChanged'
+            },
             active:  {
                 type: Boolean,
                 value: false,
@@ -98,10 +112,10 @@
         },
 
         observers: [
-            'inputPositionChanged(inputPlug.block.x, inputPlug.block.y)',
-            'outputPositionChanged(outputPlug.block.x, outputPlug.block.y)',
-            'compute(inputPlug.value)',
-            'compute(outputPlug)',
+            'inputPositionChanged(inlet.block.x, inlet.block.y)',
+            'outputPositionChanged(outlet.block.x, outlet.block.y)',
+            'compute(inlet.value)',
+            'compute(outlet)',
         ],
 
         computeWidth: function (xi, xo) {
@@ -129,6 +143,87 @@
             );
         },
 
+        inputBlockChanged: function (newBlock, oldBlock) {
+            if (oldBlock) {
+                this.unlisten(oldBlock, 'io-ready', 'inletReady');
+            }
+
+            if (typeof newBlock === 'string') {
+                this.inputBlock = document.querySelector('#' + newBlock);
+            } else if (this.inputBlock) {
+                this.listen(this.inputBlock, 'io-ready', 'inletReady');
+            }
+        },
+
+        outputBlockChanged: function (newBlock, oldBlock) {
+            if (oldBlock) {
+                this.unlisten(oldBlock, 'io-ready', 'outletReady');
+            }
+
+            if (typeof newBlock === 'string') {
+                this.outputBlock = document.querySelector('#' + newBlock);
+            } else if (this.outputBlock) {
+                this.listen(this.outputBlock, 'io-ready', 'outletReady');
+            }
+        },
+
+        inletChanged: function (inlet, oldlet) {
+            var found;
+            inlet = this.inlet;
+
+            // Unwire the former one.
+            if (oldlet && oldlet.wire) {
+                oldlet.wire = undefined;
+            }
+
+            // If given a string, then find the real inlet element (io-plug).
+            if (typeof inlet === 'string' || typeof inlet === 'number') {
+                found = this.inputBlock && this.inputBlock.getOutlet &&  this.inputBlock.getOutlet(inlet);
+                this.inlet = found || this.inlet;
+                return;
+            }
+
+            // If given an inlet element, then wire it.
+            if (inlet && inlet.isOutput()) {
+                inlet.wire = this;
+            }
+        },
+
+        outletChanged: function (outlet, oldlet) {
+            var found;
+            outlet = this.outlet;
+
+            // Unwire the former one.
+            if (oldlet && oldlet.wire) {
+                oldlet.wire = undefined;
+            }
+
+            // If given a string, then find the real outlet element (io-plug).
+            if (typeof outlet === 'string' || typeof outlet === 'number') {
+                found = this.outputBlock && this.outputBlock.getInlet && this.outputBlock.getInlet(outlet);
+                this.outlet = found || this.outlet;
+                return;
+            }
+
+            // If given an outlet element, then wire it.
+            if (outlet && outlet.isInput()) {
+                outlet.wire = this;
+            }
+        },
+
+        inletReady: function (event, inlet) {
+            if (inlet.isOutput() && (this.inlet === inlet || this.inlet === inlet.name || this.inlet === inlet.getIndex())) {
+                this.inlet = inlet;
+            }
+        },
+
+
+        outletReady: function (event, outlet) {
+            if (outlet.isInput() && (this.outlet === outlet || this.outlet === outlet.name || this.outlet === outlet.getIndex())) {
+                this.outlet = outlet;
+            }
+        },
+
         inputPositionChanged: function () {
             this.positionChanged(true);
         },
@@ -140,8 +235,8 @@
         positionChanged: function (isInput) {
 
             var rectI, rectO,
-            inputBlock = this.inputPlug && this.inputPlug.block,
-            outputBlock = this.outputPlug && this.outputPlug.block,
+            inputBlock = this.inlet && this.inlet.block,
+            outputBlock = this.outlet && this.outlet.block,
             headerOffset = 64 + 9; // header's height + plug's height / 2
 
             // FIXME: need to compute the position relative to the canvas (i.e minus toolbar height = -65).
@@ -161,11 +256,11 @@
             if (this.isInputPlugged() && !this.isOutputPlugged()) {
 
                 rectI = getRect(inputBlock);
-                this.setInputPosition(inputBlock.x + rectI.width, inputBlock.y + this.inputPlug.offsetTop + headerOffset);
+                this.setInputPosition(inputBlock.x + rectI.width, inputBlock.y + this.inlet.offsetTop + headerOffset);
             // Only output plugged
             } else if (!this.isInputPlugged() && this.isOutputPlugged()) {
                 rectO = getRect(outputBlock);
-                this.setOutputPosition(outputBlock.x, outputBlock.y + this.outputPlug.offsetTop + headerOffset);
+                this.setOutputPosition(outputBlock.x, outputBlock.y + this.outlet.offsetTop + headerOffset);
             // Both plugged
             } else if (this.isInputPlugged() && this.isOutputPlugged()) {
                 rectI = getRect(inputBlock);
@@ -173,11 +268,11 @@
 
                 // FIXME: find a way to avoid this test (the instruction order should not matter).
                 if (isInput) {
-                    this.setInputPosition(inputBlock.x + rectI.width, inputBlock.y + this.inputPlug.offsetTop + headerOffset);
-                    this.setOutputPosition(outputBlock.x, outputBlock.y + this.outputPlug.offsetTop + headerOffset);
+                    this.setInputPosition(inputBlock.x + rectI.width, inputBlock.y + this.inlet.offsetTop + headerOffset);
+                    this.setOutputPosition(outputBlock.x, outputBlock.y + this.outlet.offsetTop + headerOffset);
                 } else {
-                    this.setOutputPosition(outputBlock.x, outputBlock.y + this.outputPlug.offsetTop + headerOffset);
-                    this.setInputPosition(inputBlock.x + rectI.width, inputBlock.y + this.inputPlug.offsetTop + headerOffset);
+                    this.setOutputPosition(outputBlock.x, outputBlock.y + this.outlet.offsetTop + headerOffset);
+                    this.setInputPosition(inputBlock.x + rectI.width, inputBlock.y + this.inlet.offsetTop + headerOffset);
                 }
             }
         },
@@ -236,60 +331,30 @@
         },
 
         isInputPlugged: function () {
-            return !!this.inputPlug;
+            return this.inlet instanceof Element;
         },
 
         isOutputPlugged: function () {
-            return !!this.outputPlug;
-        },
-
-        setInput: function (plug) {
-            if (plug.isOutput()) {
-                plug.wire = this;
-                this.set('inputPlug', plug);
-            }
-        },
-
-        unsetInput: function () {
-            var input = this.inputPlug;
-            if (input) {
-                input.wire = undefined;
-                this.set('inputPlug', undefined);
-            }
-        },
-
-        setOutput: function (plug) {
-            if (plug.isInput()) {
-                plug.wire = this;
-                this.set('outputPlug', plug);
-            }
-        },
-
-        unsetOutput: function () {
-            var output = this.outputPlug;
-            if (output) {
-                output.wire = undefined;
-                this.set('outputPlug', undefined);
-            }
+            return this.outlet instanceof Element;
         },
 
         compute: function () {
             if (this.isInputPlugged() && this.isOutputPlugged()) {
                 var that = this;
                 // Here we set the `value` from the `block` in order the trigger block's path observers.
-                this.outputPlug.block.set('inputs.' + this.outputPlug.getIndex() + '.value', this.inputPlug.value);
+                this.outlet.block.set('inputs.' + this.outlet.getIndex() + '.value', this.inlet.value);
                 // Highlight the wire
                 clearTimeout(this._activeTimeout);
                 this._activeTimeout = setTimeout(function() {
                     that.active = false;
-                }, 700)
+                }, 700);
                 this.active = true;
             }
         },
 
         remove: function() {
-            this.unsetInput();
-            this.unsetOutput();
+            this.inlet = undefined;
+            this.outlet = undefined;
             Element.prototype.remove.call(this);
         }
 

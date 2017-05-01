@@ -1,7 +1,7 @@
 package com.vpusher.domains;
 
+import com.vpusher.BaseX;
 import org.neo4j.ogm.annotation.GraphId;
-import org.neo4j.ogm.annotation.Index;
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Relationship;
 
@@ -16,6 +16,7 @@ public class Project {
 
     @GraphId
     private Long id;
+    private String uid;
     private String name;
     @Relationship(type = "OWNS", direction = Relationship.OUTGOING)
     private Set<Block> blocks = new HashSet<>();
@@ -23,12 +24,22 @@ public class Project {
     private Set<User> members  = new HashSet<>();
 
     public Project() {
+        this.uid = BaseX.random();
     }
 
-    public Project(String name) {
+
+    public Project(String uid, String name) {
+        this.uid = uid;
         this.name = name;
     }
 
+    public String getUid() {
+        return uid;
+    }
+
+    public void setUid(String uid) {
+        this.uid = uid;
+    }
     public Long getId() {
         return id;
     }

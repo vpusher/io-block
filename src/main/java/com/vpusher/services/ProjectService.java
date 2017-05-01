@@ -26,8 +26,12 @@ public class ProjectService {
         return this.projectRepository.findOne(id);
     }
 
-    public Project get(String name) {
-        return this.projectRepository.findByName(name);
+    public Project get(String uid) {
+        return this.projectRepository.findByUid(uid);
+    }
+
+    public Project getWithWires(Long id) {
+        return this.projectRepository.findOne(id, 2);
     }
 
     public Iterable<Project> all() {

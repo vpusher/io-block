@@ -151,6 +151,7 @@
                 parent = parent.parentElement;
             }*/
             this.block = this.domHost;
+            this.fire('io-ready', this);
         },
 
         wireChanged: function (wire) {
@@ -174,18 +175,15 @@
         },
 
         getIndex: function () {
-            return this.block.inputs.indexOf(this);
+            return this.isInput() ? this.block.inputs.indexOf(this) : this.block.outputs.indexOf(this);
         },
 
         onToggle: function (event) {
             var box = this.$.box,
-                wire = this.wire,
-                block = this.block;
+                wire = this.wire;
 
             // Remove wire if already plugged/checked
             if (box.checked && this.wire) {
-                wire.unsetInput();
-                wire.unsetOutput();
                 wire.remove();
                 if (wire === app.currentWire) {
                     app.endAddWire();
@@ -196,11 +194,11 @@
                 // 1) First plug: start add wire.
                 if (!wire) {
                     wire = app.beginAddWire();
-                    wire['set' + (this.isInput() ? 'Output' : 'Input')](this);
+                    wire.set(this.isInput() ? 'outlet' : 'inlet', this);
                 // 2) Second plug: stop add wire. Only plug wire output if not already plug (avoid wire between 2 outputs).
                 } else if ((this.isInput() && !wire.isOutputPlugged()) || (this.isOutput() && !wire.isInputPlugged())) {
                     app.endAddWire();
-                    wire['set' + (this.isInput() ? 'Output' : 'Input')](this);
+                    wire.set(this.isOutput() ? 'inlet' : 'outlet', this);
                 // If none of the previous cases, avoid change checkbox state.
                 } else {
                     event.preventDefault();

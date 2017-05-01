@@ -12,6 +12,10 @@ public interface ProjectRepository extends Neo4jRepository<Project, Long> {
 
     Project findOne(Long id);
 
+    Project findOne(Long id, int depth);
+
     Project findByName(String name);
+
+    Project findByUid(String uid);
 
 }

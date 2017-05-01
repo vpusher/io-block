@@ -2,6 +2,7 @@ package com.vpusher.services;
 
 import com.vpusher.domains.Block;
 import com.vpusher.domains.Wire;
+import com.vpusher.repositories.BlockRepository;
 import com.vpusher.repositories.WireRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,9 +15,12 @@ public class WireService {
 
     private final WireRepository wireRepository;
 
+    private final BlockRepository blockRepository;
+
     @Autowired
-    public WireService(WireRepository wireRepository) {
+    public WireService(WireRepository wireRepository, BlockRepository blockRepository) {
         this.wireRepository = wireRepository;
+        this.blockRepository = blockRepository;
     }
 
     public Wire get(Long id) {
@@ -45,7 +49,10 @@ public class WireService {
         wire.setOutput(outputBlock);
         wire.setInlet(inlet);
         wire.setOutlet(outlet);
-        wireRepository.save(wire);
+        inputBlock.getWires().add(wire);
+        outputBlock.getWires().add(wire);
+        blockRepository.save(inputBlock);
+        blockRepository.save(outputBlock);
     }
 
     /*public void disconnect(Block inputBlock, String inlet, Block outputBlock, String outlet) {

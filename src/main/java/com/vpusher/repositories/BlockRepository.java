@@ -4,6 +4,9 @@ import com.vpusher.domains.Block;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
+import java.util.Collection;
+import java.util.Set;
+
 /**
  * Created by vpusher on 4/4/17.
  */

@@ -82,6 +82,11 @@
 
     <body unresolved>
         <io-app>
+            <io-wire input-block="s1" inlet="count" output-block="a1" outlet="addend1"></io-wire>
+            <io-wire input-block="s3" inlet="count" output-block="a1" outlet="addend2"></io-wire>
+            <io-wire input-block="a1" inlet="sum" output-block="d1" outlet="i0"></io-wire>
+
+
             <io-block
                     x="100"
                     y="100"
@@ -90,13 +95,27 @@
             </io-block>
 
             <io-block
-                    x="150"
-                    y="190"
+                    id="s3"
+                    x="100"
+                    y="300">
+                <io-block-supplier></io-block-supplier>
+            </io-block>
+
+            <io-block
+                    x="350"
+                    y="200"
+                    id="a1">
+                <io-block-addition></io-block-addition>
+            </io-block>
+
+            <io-block
+                    x="650"
+                    y="250"
                     id="d1">
                 <io-block-display></io-block-display>
             </io-block>
 
-            <io-block
+           <!-- <io-block
                     x="80"
                     y="120"
                     id="t1">
@@ -108,21 +127,9 @@
                     x="100"
                     y="290">
                 <io-block-curve></io-block-curve>
-            </io-block>
+            </io-block>-->
 
-            <io-block
-                    id="s3"
-                    x="100"
-                    y="500">
-                <io-block-supplier></io-block-supplier>
-            </io-block>
 
-            <io-block
-                    x="400"
-                    y="150"
-                    id="c1">
-                <io-block-addition></io-block-addition>
-            </io-block>
         </io-app>
     </body>
 

@@ -5,6 +5,9 @@ import com.vpusher.repositories.BlockRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
+import java.util.Set;
+
 /**
  * Created by f2i on 4/5/17.
  */

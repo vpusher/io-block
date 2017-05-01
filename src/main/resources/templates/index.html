@@ -2,7 +2,7 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
     <head>
-        <title>I/O Blocks</title>
+        <title th:text="${project.name}">I/O Blocks</title>
 
         <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
         <meta charset="utf-8">
@@ -51,6 +51,18 @@
         </script>
 
         <link rel="import" href="/elements/io-app.html">
+        <link rel="import" href="/elements/io-wire.html">
+        <link rel="import" href="/elements/io-block.html">
+        <link rel="import" href="/elements/io-block-addition.html">
+        <link rel="import" href="/elements/io-block-subtraction.html">
+        <link rel="import" href="/elements/io-block-multiplication.html">
+        <link rel="import" href="/elements/io-block-division.html">
+        <link rel="import" href="/elements/io-block-supplier.html">
+        <link rel="import" href="/elements/io-block-display.html">
+        <link rel="import" href="/elements/io-block-delay.html">
+        <link rel="import" href="/elements/io-block-clock.html">
+        <link rel="import" href="/elements/io-block-curve.html">
+        <link rel="import" href="/elements/io-block-sinus.html">
 
         <style>
         * {
@@ -71,6 +83,13 @@
 
     <body unresolved>
         <io-app>
+            <io-wire
+                th:each="wire: ${wires}"
+                th:input-block="'_' + ${wire.input.id}"
+                th:inlet="${wire.inlet}"
+                th:output-block="'_' + ${wire.output.id}"
+                th:outlet="${wire.outlet}">
+            </io-wire>
             <io-block
                 th:each="block: ${blocks}"
                 th:id="'_' + ${block.id}"
@@ -78,13 +97,6 @@
                 th:y="${block.y}"
                 th:utext="'<' + ${block.computor} + '></' + ${block.computor} + '>'">
             </io-block>
-            <io-wire
-                    th:each="wire: ${wires}"
-                    th:id="${wire.id}"
-                    th:x="${block.x}"
-                    th:y="${block.y}"
-                    th:utext="'<' + ${block.computor} + '></' + ${block.computor} + '>'">
-            </io-wire>
         </io-app>
     </body>
 

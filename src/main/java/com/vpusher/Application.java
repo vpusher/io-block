@@ -86,19 +86,19 @@ public class Application {
             userService.update(roy);
             userService.update(craig);
 
-            Project project1 = new Project("project1");
-            Project project2 = new Project("project2");
+            Project project1 = new Project("project1", "project1");
+            Project project2 = new Project("project2", "project2");
             projectService.update(project1);
             projectService.update(project2);
 
-            Block b1 = new Block("b1", "io-block-add", 0, 0);
-            Block b2 = new Block("b2", "io-block-display", 200, 250);
-            Block b3 = new Block("b3", "io-block-supplier", 70, 100);
-            Block b4 = new Block("b4", "io-block-supplier", 50, 50);
-            blockService.update(b1);
-            blockService.update(b2);
-            blockService.update(b3);
-            blockService.update(b4);
+            Block addition = new Block("b1", "io-block-addition", 220, 150);
+            Block display = new Block("b2", "io-block-display", 400, 200);
+            Block supplier1 = new Block("b3", "io-block-supplier", 30, 100);
+            Block supplier2 = new Block("b4", "io-block-supplier", 30, 270);
+            blockService.update(addition);
+            blockService.update(display);
+            blockService.update(supplier1);
+            blockService.update(supplier2);
 
             /* --------------- */
 
@@ -106,13 +106,12 @@ public class Application {
             projectService.addMembers(project1, greg, roy);
 
             // Add block to project.;
-            projectService.addBlocks(project1, b1, b2, b3, b4);
+            projectService.addBlocks(project1, addition, display, supplier1, supplier2);
 
             // Wire blocks
-            wireService.connect(b1, "zip", b2, "zap");
-            wireService.connect(b1, "zip", b2, "zap");
-            wireService.connect(b1, "lol", b2, "lal");
-            wireService.connect(b1, "lol", b2, "plop");
+            wireService.connect(supplier1, "0", addition, "0");
+            wireService.connect(supplier2, "0", addition, "1");
+            wireService.connect(addition, "0", display, "0");
 
 
         };

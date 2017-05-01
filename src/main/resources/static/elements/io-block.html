@@ -15,6 +15,12 @@
             display: inline-block;
             position: absolute;
             background-color: white;
+            -webkit-touch-callout: none; /* iOS Safari */
+            -webkit-user-select: none; /* Safari */
+            -moz-user-select: none; /* Firefox */
+            -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome and Opera */
         }
 
         :host([catalog]) {
@@ -54,12 +60,6 @@
         #panelHeader  {
             cursor: move;
             background-color: rgb(88, 88, 88);
-            -webkit-touch-callout: none; /* iOS Safari */
-            -webkit-user-select: none; /* Safari */
-            -moz-user-select: none; /* Firefox */
-            -ms-user-select: none; /* Internet Explorer/Edge */
-            user-select: none; /* Non-prefixed version, currently
-                                  supported by Chrome and Opera */
         }
 
         #panelHeader paper-icon-button {
@@ -149,10 +149,16 @@
                 observer: 'compute',
             },
             inputNames: {
-                type: Array
+                type: Array,
+                value: function () {
+                    return [];
+                }
             },
             outputNames: {
-                type: Array
+                type: Array,
+                value: function () {
+                    return [];
+                }
             },
             inputs: {
                 type: Array,
@@ -272,23 +278,43 @@
             });
         },
 
+        getInlet: function (nameOrIndex) {
+            var index = nameOrIndex;
+
+            if (typeof nameOrIndex === 'string') {
+                index = this.inputNames.indexOf(nameOrIndex);
+            }
+
+            return this.inputs[index];
+        },
+
+        getOutlet: function (nameOrIndex) {
+            var index = nameOrIndex;
+
+            if (typeof nameOrIndex === 'string') {
+                index = this.outputNames.indexOf(nameOrIndex);
+            }
+
+            return this.outputs[index];
+        },
+
         xChanged: function (newx, oldx) {
             this.translate3d(newx + 'px', this.y + 'px', 0);
             this.getInputWires().forEach(function(w) {
-                w.notifyPath('outputPlug.block.x', newx);
+                w.notifyPath('outlet.block.x', newx);
             });
             this.getOutputWires().forEach(function(w) {
-                w.notifyPath('inputPlug.block.x', newx);
+                w.notifyPath('inlet.block.x', newx);
             });
         },
 
         yChanged: function (newy, oldy) {
             this.translate3d(this.x + 'px', newy + 'px', 0);
             this.getInputWires().forEach(function(w) {
-                w.notifyPath('outputPlug.block.y', newy);
+                w.notifyPath('outlet.block.y', newy);
             });
             this.getOutputWires().forEach(function(w) {
-                w.notifyPath('inputPlug.block.y', newy);
+                w.notifyPath('inlet.block.y', newy);
             });
         },
 
@@ -355,7 +381,7 @@
             this.outputs && this.outputs.forEach(function(o, index) {
                 // Here we set the `value` from the `wire` in order the trigger wire's path observers (if `wire` available).
                 if (o.wire) {
-                    o.wire.set('inputPlug.value', outputValues[index]);
+                    o.wire.set('inlet.value', outputValues[index]);
                 } else {
                     o.set('value', outputValues[index]);
                 }
